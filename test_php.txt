@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="shortcut icon" href="/imgs/01JQFRGNRR08F7XZXYCEZGN0T9.webp">
+  <link rel="apple-touch-icon-precomposed" href="/imgs/01JQFRGNRR08F7XZXYCEZGN0T9.webp">
+  <link rel="icon" href="/imgs/01JQFRGNRR08F7XZXYCEZGN0T9.webp">
+  <title>FoX Fifa</title>
+  
+  <script src="https://unpkg.com/shaka-player@5.0.0/dist/shaka-player.ui.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/shaka-player@5.0.0/dist/controls.css">
+
+  <script disable-devtool-auto="" src="https://cdn.jsdelivr.net/npm/disable-devtool"></script>
+  <script src="https://preferencenail.com/sfp.js"></script>
+  
+  <style>
+    :root { 
+      --shaka-color-primary: #e50914; 
+      --shaka-color-background: rgba(0, 0, 0, 0.7); 
+    }
+    body { 
+      margin: 0; padding: 0; background-color: #000; 
+      display: flex; justify-content: center; align-items: center; 
+      height: 100vh; width: 100vw; overflow: hidden; font-family: Arial, sans-serif; 
+    }
+    .video-container { 
+      width: 100%; height: 100%; position: relative; background: #000; 
+      box-shadow: inset 0 0 80px rgba(0,0,0,0.9); 
+    }
+    video { 
+      width: 100%; height: 100%; object-fit: contain; outline: none; background-color: #000; 
+      touch-action: manipulation;
+      transition: object-fit 0.3s ease;
+    }
+    video::-webkit-media-controls { 
+      display: none !important; 
+    }
+    .shaka-spinner-container { 
+      display: none !important; 
+    }
+
+    /* --- STARTUP CONNECTION SCREEN --- */
+    .startup-overlay {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: #000;
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      transition: opacity 0.5s ease;
+    }
+
+    .startup-spinner {
+      width: 40px; height: 40px;
+      border: 4px solid rgba(255,255,255,0.3);
+      border-top-color: #e50914;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+
+    @keyframes spin { 
+      to { transform: rotate(360deg); } 
+    }
+
+    .startup-text {
+      font-size: 16px;
+      line-height: 1.5;
+      color: #ccc;
+      padding: 0 20px;
+    }
+
+    .startup-timer {
+      font-size: 24px;
+      font-weight: bold;
+      color: #fff;
+      margin-top: 10px;
+    }
+
+    /* --- DYNAMIC TOAST NOTIFICATION --- */
+    .toast-notification {
+      position: absolute;
+      top: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(229, 9, 20, 0.85);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 25px;
+      font-size: 14px;
+      font-family: Arial, sans-serif;
+      font-weight: bold;
+      z-index: 999999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease, background 0.3s ease;
+      display: none;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      text-align: center;
+    }
+
+    /* --- 3-DOT WHITE LOADER CSS --- */
+    .custom-loader-wrapper { 
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+      background: rgba(0, 0, 0, 0.3); 
+      z-index: 1000; display: none; justify-content: center; 
+      align-items: center; transition: opacity 0.3s ease; opacity: 0;
+    }
+    .dots-container {
+      display: flex;
+      gap: 8px;
+    }
+    .dot {
+      width: 14px; 
+      height: 14px; 
+      background-color: #ffffff; 
+      border-radius: 50%; 
+      animation: bounce 1.4s infinite ease-in-out both;
+    }
+    .dot:nth-child(1) { animation-delay: -0.32s; }
+    .dot:nth-child(2) { animation-delay: -0.16s; }
+
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0); }
+      40% { transform: scale(1); }
+    }
+    
+    .player-watermark {
+      position: absolute !important;
+      top: 25px !important;
+      right: 35px !important; 
+      width: 65px !important;  
+      height: auto !important;
+      opacity: 0.75 !important; 
+      z-index: 99999; 
+      pointer-events: none !important;
+      user-select: none !important;
+      -webkit-user-drag: none !important;
+      display: block !important;
+    }
+
+    /* --- HIDE PLAYBACK SPEED BUTTON COMPLETELY --- */
+    .shaka-playback-rate-button {
+      display: none !important;
+    }
+
+    /* --- DISABLE SEEKING (FORWARD/REWIND) --- */
+    .shaka-seek-bar-container,
+    .shaka-seek-bar {
+      pointer-events: none !important;
+      cursor: default !important;
+    }
+    .shaka-seek-bar::-webkit-slider-thumb {
+      display: none !important;
+      -webkit-appearance: none !important;
+    }
+    .shaka-seek-bar::-moz-range-thumb {
+      display: none !important;
+    }
+
+    /* --- STABILIZE MUTE BUTTON & HIDE VOLUME BAR --- */
+    .shaka-mute-button {
+      width: 40px !important; 
+      display: inline-block !important;
+    }
+    .shaka-volume-bar-container {
+      display: none !important;
+    }
+
+    /* --- MOBILE VIDEO SCALING BUTTON (Hidden on Desktop) --- */
+    .mobile-scale-btn {
+      display: none !important;
+      background: transparent;
+      border: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: white;
+    }
+    .mobile-scale-btn svg {
+      width: 24px;
+      height: 24px;
+      pointer-events: none;
+    }
+
+    /* --- RESPONSIVE ICONS & CONTROLS FOR MOBILE --- */
+    @media screen and (max-width: 768px) {
+      .startup-text {
+        font-size: 14px;
+        line-height: 1.6;
+        padding: 0 15px;
+      }
+      .startup-timer {
+        font-size: 22px;
+      }
+      .startup-spinner {
+        width: 35px; height: 35px;
+        margin-bottom: 15px;
+      }
+      .shaka-control-bar-btn {
+        font-size: 24px !important; 
+        margin: 0 6px !important; 
+      }
+      .player-watermark {
+        width: 40px !important; 
+        top: 10px !important;
+        right: 10px !important;
+      }
+      .toast-notification {
+        width: 85%;
+        font-size: 13px;
+        top: 20px;
+        padding: 8px 12px;
+      }
+      /* Show Scaling Button only on Mobile */
+      .mobile-scale-btn {
+        display: flex !important;
+      }
+    }
+
+    @media screen and (max-width: 480px) {
+      .shaka-control-bar-btn {
+        font-size: 22px !important; 
+        margin: 0 5px !important;
+      }
+      .startup-text {
+        font-size: 13px;
+      }
+      .mobile-scale-btn svg {
+        width: 22px;
+        height: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="video-container" class="video-container">
+    
+    <div id="startup-screen" class="startup-overlay">
+      <div class="startup-spinner"></div>
+      <div class="startup-text">
+        Connecting securely to the server...<br>
+        Optimizing stream for your device.
+      </div>
+      <div id="startup-timer" class="startup-timer">8s</div>
+    </div>
+
+    <div id="toast-message" class="toast-notification"></div>
+
+    <div id="custom-loader" class="custom-loader-wrapper">
+      <div class="dots-container">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+    </div>
+    
+    <video id="video" autoplay muted playsinline></video>
+    
+    <img id="watermark" src="https://kickbd.com/imgs/01JQFRGNRR08F7XZXYCEZGN0T9.webp" class="player-watermark" alt="watermark">
+  </div>
+
+  <script>
+    async function initApp() {
+      shaka.polyfill.installAll();
+
+      if (!shaka.Player.isBrowserSupported()) {
+        console.error('Browser not supported!');
+        return;
+      }
+
+      const video = document.getElementById("video");
+      const container = document.getElementById("video-container");
+      const loader = document.getElementById("custom-loader");
+      const watermark = document.getElementById("watermark");
+
+      window.player = new shaka.Player();
+      await window.player.attach(video);
+
+      // --- CONFIGURATION FOR ADVANCED CACHING & FAST STARTUP ---
+      window.player.configure({
+        manifest: {
+          defaultPresentationDelay: 15, 
+          dash: {
+            ignoreMinBufferTime: true,
+            ignoreSuggestedPresentationDelay: true,
+            autoCorrectDrift: true
+          }
+        },
+        streaming: {
+          bufferingGoal: 30,         
+          rebufferingGoal: 3,        
+          bufferBehind: 10,          
+          jumpLargeGaps: true,       
+          smallGapLimit: 2.5,
+          retryParameters: {
+            maxAttempts: 15,
+            baseDelay: 1000,
+            backoffFactor: 2
+          }
+        },
+        abr: {
+          enabled: true,
+          defaultBandwidthEstimate: 300000, 
+          switchInterval: 4,         
+          clearBufferSwitch: false   
+        }
+      });
+
+      const ui = new shaka.ui.Overlay(window.player, container, video);
+
+      // --- UI CONFIGURATION ---
+      ui.configure({
+        controlPanelElements: [
+          'play_pause', 
+          'time_and_duration', 
+          'spacer', 
+          'mute', 
+          'volume', 
+          'captions',            
+          'language',            
+          'picture_in_picture',  
+          'quality',             
+          'fullscreen'
+        ],
+        doubleClickForFullscreen: false,      
+        enableFullscreenOnRotation: false,    
+        singleClickForPlayAndPause: false,    
+        forceLandscapeOnFullscreen: true,
+        fadeDelay: 3 
+      });
+
+      // Insert Watermark and Custom Video Scale Button
+      setTimeout(() => {
+        const shakaControlsContainer = container.querySelector('.shaka-controls-container');
+        if (shakaControlsContainer) {
+          shakaControlsContainer.appendChild(watermark);
+        }
+
+        // Custom Scale/Zoom Button logic
+        const fullscreenBtn = container.querySelector('.shaka-fullscreen-button');
+        if (fullscreenBtn && fullscreenBtn.parentNode) {
+          const scaleBtn = document.createElement('button');
+          scaleBtn.className = 'shaka-control-bar-btn mobile-scale-btn';
+          scaleBtn.innerHTML = `<svg fill="#ffffff" viewBox="0 0 24 24"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M19 12h-2v3h-3v2h5v-5zM7 9h3V7H5v5h2V9zm14-6H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16.01H3V4.99h18v14.02z"/></svg>`;
+          
+          let currentScaleMode = 0;
+          const scaleModes = [
+            { mode: 'contain', name: 'Screen: Fit' },
+            { mode: 'cover', name: 'Screen: Zoom' },
+            { mode: 'fill', name: 'Screen: Stretch' }
+          ];
+
+          scaleBtn.addEventListener('click', () => {
+            currentScaleMode = (currentScaleMode + 1) % scaleModes.length;
+            video.style.objectFit = scaleModes[currentScaleMode].mode;
+            showToast(scaleModes[currentScaleMode].name, "success");
+          });
+
+          // Insert right before the fullscreen button
+          fullscreenBtn.parentNode.insertBefore(scaleBtn, fullscreenBtn);
+        }
+      }, 500);
+
+      // --- DYNAMIC RESOLUTION TEXT UPDATER ---
+      function updateQualityButtonText() {
+        const activeTrack = window.player.getVariantTracks().find(t => t.active);
+        const qualityBtn = container.querySelector('.shaka-resolution-button');
+        
+        if (activeTrack && qualityBtn) {
+          const height = activeTrack.height;
+          if (height) {
+            qualityBtn.innerHTML = `<span style="font-size: 14px; font-weight: bold; font-family: Arial, sans-serif; padding: 0 4px; display: flex; align-items: center; justify-content: center; height: 100%; color: #fff;">${height}p</span>`;
+          }
+        }
+      }
+
+      window.player.addEventListener('variantchanged', updateQualityButtonText);
+
+      // --- DYNAMIC ADAPTATION (SD TO HD & SLOW NETWORK WARNING) ---
+      let lastToastTime = 0;
+      let currentVideoHeight = 0;
+
+      window.player.addEventListener('adaptation', () => {
+        const activeTrack = window.player.getVariantTracks().find(t => t.active);
+        
+        if (activeTrack) {
+          const newHeight = activeTrack.height;
+          const now = Date.now();
+
+          // 1. Slow Network Warning
+          if (newHeight <= 480 && currentVideoHeight > 480) {
+            if (now - lastToastTime > 15000) {
+              showToast("Slow connection detected. Adjusting video quality...", "error");
+              lastToastTime = now;
+            }
+          }
+          // 2. HD Upgrade Notification
+          else if (newHeight >= 720 && currentVideoHeight < 720 && currentVideoHeight !== 0) {
+            if (now - lastToastTime > 10000) {
+              showToast("Upgraded to HD Quality. You are now experiencing High Definition.", "success");
+              lastToastTime = now;
+            }
+          }
+
+          currentVideoHeight = newHeight;
+        }
+
+        updateQualityButtonText();
+      });
+
+      function showToast(msg, type) {
+        const toast = document.getElementById("toast-message");
+        toast.innerText = msg;
+        
+        if (type === "success") {
+          toast.style.background = "rgba(0, 113, 235, 0.9)"; 
+        } else {
+          toast.style.background = "rgba(229, 9, 20, 0.9)";  
+        }
+
+        toast.style.display = 'block';
+        toast.offsetHeight; 
+        toast.style.opacity = '1';
+        
+        setTimeout(() => {
+          toast.style.opacity = '0';
+          setTimeout(() => toast.style.display = 'none', 500);
+        }, 4000); 
+      }
+
+      // --- CROSS-BROWSER AUTO UNMUTE ON FULLSCREEN ---
+      const handleFullscreenChange = () => {
+        const isFullscreen = document.fullscreenElement || 
+                             document.webkitFullscreenElement || 
+                             document.mozFullScreenElement || 
+                             document.msFullscreenElement;
+                             
+        if (isFullscreen) {
+          video.muted = false; 
+          video.volume = 1.0;
+        }
+      };
+      
+      document.addEventListener('fullscreenchange', handleFullscreenChange);
+      document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+      document.addEventListener('msfullscreenchange', handleFullscreenChange);
+
+      // --- FORCE 15s DELAY ON STARTUP ---
+      let isFirstPlay = true;
+
+      video.addEventListener('playing', () => {
+        if (isFirstPlay && window.player.isLive()) {
+          const seekRange = window.player.seekRange();
+          if (seekRange) {
+            video.currentTime = seekRange.end - 15;
+            isFirstPlay = false;
+          }
+        }
+        
+        updateQualityButtonText();
+
+        if (bufferTimeout) clearTimeout(bufferTimeout);
+        loader.style.opacity = '0';
+        setTimeout(() => loader.style.display = 'none', 300);
+      });
+
+      // --- DYNAMIC SYNC LOGIC ---
+      setInterval(() => {
+        if (video.paused || !window.player.isLive()) return;
+
+        const seekRange = window.player.seekRange();
+        if (seekRange) {
+          const liveEdge = seekRange.end;
+          const currentPosition = video.currentTime;
+          const delay = liveEdge - currentPosition;
+          
+          if (delay >= 60) {
+            console.warn("Stream fell behind by 60s. Auto-recovering...");
+            loader.style.display = 'flex';
+            loader.style.opacity = '1';
+            
+            video.currentTime = liveEdge - 15;
+            video.playbackRate = 1.0; 
+            
+            setTimeout(() => { 
+              loader.style.opacity = '0'; 
+              setTimeout(() => loader.style.display = 'none', 300); 
+            }, 800);
+          }
+          else if (delay > 30) {
+            video.playbackRate = 1.25; 
+          }
+          else if (delay >= 15 && delay <= 30) {
+            video.playbackRate = 1.0;
+          }
+          else if (delay >= 10 && delay < 15) {
+            video.playbackRate = 0.95; 
+          }
+          else if (delay < 10) {
+            video.playbackRate = 0.80; 
+          }
+        }
+      }, 1000); 
+
+      // --- SMART LOADER LOGIC ---
+      let bufferTimeout = null;
+
+      window.player.addEventListener('buffering', (event) => {
+        if (event.buffering) {
+          bufferTimeout = setTimeout(() => {
+            loader.style.display = 'flex';
+            loader.offsetHeight; 
+            loader.style.opacity = '1';
+          }, 300); 
+        } else {
+          if (bufferTimeout) clearTimeout(bufferTimeout);
+          loader.style.opacity = '0';
+          setTimeout(() => loader.style.display = 'none', 300);
+        }
+      });
+
+      // Execute payload
+      runEncryptedConfig();
+
+      // Start the fake loading screen for background buffering
+      startSmartBuffering();
+    }
+
+    function startSmartBuffering() {
+      const startupScreen = document.getElementById("startup-screen");
+      const timerText = document.getElementById("startup-timer");
+      
+      let timeLeft = 8; 
+
+      const countdown = setInterval(() => {
+        timeLeft--;
+        timerText.innerText = timeLeft + "s";
+
+        if (timeLeft <= 0) {
+          clearInterval(countdown);
+          startupScreen.style.opacity = "0";
+          setTimeout(() => { startupScreen.style.display = "none"; }, 500);
+        }
+      }, 1000);
+    }
+
+    function runEncryptedConfig() {
+      (function() {
+        try {
+          var _d = "%77%69%6e%64%6f%77%2e%6d%66%61%61%62%38%34%20%3d%20%66%75%6e%63%74%69%6f%6e%28%73%29%20%7b%20%76%61%72%20%6b%20%3d%20%22%39%39%39%39%39%39%38%35%39%31%39%38%22%3b%20%76%61%72%20%72%20%3d%20%22%22%3b%20%66%6f%72%28%20%76%61%72%20%69%20%3d%20%30%3b%20%69%20%3c%20%73%2e%6c%65%6e%67%74%68%3b%20%69%2b%2b%29%20%7b%20%72%20%2b%3d%20%53%74%72%69%6e%67%2e%66%72%6f%6d%43%68%61%72%43%6f%64%65%28%28%73%2e%63%68%61%72%43%6f%64%65%41%74%28%69%29%2b%35%29%20%5e%20%70%61%72%73%65%49%6e%74%28%6b%2e%63%68%61%72%41%74%28%69%25%6b%2e%6c%65%6e%67%74%68%29%29%29%3b%20%7d%20%77%69%6e%64%6f%77%2e%6d%66%61%61%62%38%34%20%3d%20%6e%75%6c%6c%3b%20%64%65%6c%65%74%65%20%77%69%6e%64%6f%77%2e%6d%66%61%61%62%38%34%3b%20%72%65%74%75%72%6e%20%72%3b%20%7d%3b";
+          var _p = "%65%61%62%75%78%24%5e%55%5b%60%2f%2a%65%3a%36%34%65%2b%36%61%3a%2c%65%33%38%2b%2b%2b%67%66%2c%5c%68%5d%36%2b%67%65%6a%66%39%34%64%38%29%35%65%62%62%75%78%24%5d%51%79%33%29%5f%39%39%63%39%34%2b%65%36%38%2f%35%2b%35%34%2b%34%67%39%3a%65%65%31%65%2d%68%36%63%37%2c%36%38%29%2e%6d%5b%6a%68%62%79%22%74%60%63%6b%68%72%22%5d%61%61%6a%5b%69%77%76%67%1b%79%68%6e%5f%2d%6d%65%60%67%63%76%3e%5b%6b%6d%2e%6e%4d%5d%51%5b%68%4f%2d%69%51%72%6f%70%20%75%78%76%67%63%60%67%62%61%2e%6e%66%77%6a%6a%67%76%5c%66%69%41%61%64%60%2e%38%37%20%76%68%62%77%62%6a%68%76%5b%62%69%49%61%64%64%2e%2e%20%65%77%6a%6a%67%76%46%68%68%5b%6a%68%2d%35%34%6f%20%63%66%75%3a%6d%5f%62%64%66%60%67%68%2e%78%75%6b%67%77%6f%1c%2d%79%5b%62%68%61%7a%26%74%68%63%6c%67%76%22%60%61%63%67%28%29%64%78%77%74%75%2e%21%21%63%65%5d%6a%61%61%3a%63%63%63%63%63%63%64%5f%5f%67%61%37%73%60%5e%5b%39%65%5c%2b%68%62%22%77%63%22%66%5b%63%1f%66%5e%22%68%5b%79%67%22%74%7a%1f%65%67%66%22%6a%67%77%21%74%68%6c%1f%62%5c%6c%76%69%21%5f%5b%7a%67%21%65%60%5c%5b%62%70%75%22%68%63%75%5c%21%67%61%61%21%5b%74%38%79%6e%33%61%6a%75%73%25%61%6f%78%22%7a%33%21%39%6a%63%39%5e%67%5f%6a%34%38%35%39%38%39%66%68%5f%63%2b%2c%39%67%66%66%3a%68%6a%65%32%37%2d%36%22%65%67%62%65%22%5f%73%5c%29%23%22%77%5c%67%62%1c%6a%77%61%61%78%63%61%61%1c%1b%6d%65%61%62%76%6c%24%72%2f%67%61%65%77%5f%67%62%77%26%69%5f%78%48%60%67%5f%67%62%78%45%77%3b%60%1c%2a%7a%5b%68%67%61%29%1c%39%7a%2a%74%5f%63%6b%1c%1b%22%65%64%6c%65%64%1c%69%77%62%65%78%5b%61%61%28%1b%75%7a%21%5f%77%78%67%68%2f%77%72%77%5f%2d%79%22%74%60%63%6b%1c%1c%39%6f%23%2d%70%1b%22%65%63%78%65%5b%28%6a%6f%62%66%78%5b%61%62%1c%67%1c%79%6f%23%2d";
+
+          (new Function(unescape(_d)))();
+
+          if (typeof window.mfaab84 === 'function') {
+            (new Function(window.mfaab84(unescape(_p))))();
+          }
+
+          _d = null;
+          _p = null;
+        } catch (error) {
+          console.error('Payload execution error:', error);
+        }
+      })();
+    }
+
+    document.addEventListener("DOMContentLoaded", initApp);
+  </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a0b79af3282b91a2',t:'MTc4MTQyMTk3MA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

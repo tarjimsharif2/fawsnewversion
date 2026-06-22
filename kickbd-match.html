@@ -1,0 +1,881 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- CSRF Token -->
+    <meta name="csrf-token" content="6DQIo4A42EtrdiZncM3JaOfDFPYeowSlibaZEUcm">
+
+    
+    <meta name="keywords" content="kickbd, kickbd.com, kick bd, free sport tv, bdix ip tv, bdix sports tv" />
+
+
+    
+
+    <title>Football World Cup Match 17 || KicKBD.Com </title>
+    
+    <!-- Theme Style -->
+    <link rel="stylesheet" type="text/css" href="https://kickbd.com/css/app.css">
+
+        
+    <!-- Favicon and Touch Icons  -->
+    <link rel="shortcut icon" href="/imgs/01JQFRGNRR08F7XZXYCEZGN0T9.webp">
+    <link rel="apple-touch-icon-precomposed" href="/imgs/01JQFRGNRR08F7XZXYCEZGN0T9.webp">
+	<link rel="icon" href="/imgs/01JQFRGNRR08F7XZXYCEZGN0T9.webp">
+
+    
+    <style id='classic-theme-styles-inline-css' type='text/css'>
+        /*! This file is auto-generated */
+        .wp-block-button__link {
+            color: #fff;
+            background-color: #32373c;
+            border-radius: 9999px;
+            box-shadow: none;
+            text-decoration: none;
+            padding: calc(.667em + 2px) calc(1.333em + 2px);
+            font-size: 1.125em
+        }
+
+        .wp-block-file__button {
+            background: #32373c;
+            color: #fff;
+            text-decoration: none
+        }
+        img:is([sizes="auto" i], [sizes^="auto," i]) {
+                contain-intrinsic-size: 3000px 1500px
+            }
+            .pending , .ended{
+                pointer-events: none;
+                opacity: 0.6;
+            }
+            body {
+            background-color: transparent;
+        }
+        .event-card {
+            background: white;
+            border-radius: 10px;
+            padding: 5px;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, border-color 0.5s ease-in-out;
+            border: 2px solid #bbb;
+            position: relative;
+        }
+        .event-card.glow-border {
+            border: 2px solid #3cb371;
+            animation: glow 1.5s infinite alternate;
+        }
+        @keyframes glow {
+            from { box-shadow: 0 0 5px #3cb371; }
+            to { box-shadow: 0 0 15px #3cb371; }
+        }
+		.live-match {
+		--border-angle: 0turn;
+		--main-bg: url('https://bdix.my.id/events-v1/5.jpg');
+		--gradient-border: conic-gradient(from var(--border-angle), transparent 25%, #49cc86, #18864b 99%, transparent);
+    
+		border: solid 4px transparent;
+		border-radius: 8px;
+		/* background: var(--main-bg) center/cover no-repeat, var(--gradient-border) border-box; */
+		background-clip: padding-box, border-box;
+		animation: bg-spin 5s linear infinite;
+		}
+		
+		/* Overlay for non-live events */
+.event-card:not(.live-match)::before {
+    content: "";
+    background: url('https://bdix.my.id/events-v1/box.gif') center center / cover no-repeat;
+    opacity: 0.1;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none; /* Prevent blocking clicks */
+}
+
+
+/* Ripple Effect for Live Matches - True Overlay */
+.ripple-effect {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80px; /* Smaller ripple */
+    height: 80px; /* Smaller ripple */
+    border-radius: 50%;
+    background-color: rgb(0, 124, 40);
+    transform: translate(-50%, -50%);
+    z-index: 0; /* Behind content */
+    animation: ripple-overlay 1.2s ease-out infinite;
+    pointer-events: none; /* Ensures ripple does not interfere with clicking */
+}
+
+/* Ripple Animation */
+@keyframes ripple-overlay {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.7;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(2);
+        opacity: 0;
+    }
+}
+
+		/* Live badge blinking effect */
+		.live-blink {
+		animation: blink-animation 1s steps(2, start) infinite;
+			}
+
+		@keyframes blink-animation {
+		0% { opacity: 1; }
+		50% { opacity: 0; }
+		100% { opacity: 1; }
+		}
+
+        .event-card.live-background::before {
+            content: "";
+            background: url('https://i.postimg.cc/zfqyCLSY/football.webp') center center / cover no-repeat;
+            opacity: 0.3;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+        /* Ensure ripple is a true overlay and does not take up space */
+		.event-card {
+		position: relative;
+		overflow: hidden;
+		}
+        .team-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .team-logo {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .team-logo img {
+            width: 80%;
+            height: 80%;
+            object-fit: contain;
+        }
+        .live-badge {
+            background-color: #18864B;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+            display: inline-block;
+        }
+        .1blink {
+            animation: blink-animation 1s steps(2, start) infinite;
+        }
+        @keyframes blink-animation {
+            0% { opacity: 1; }
+            50% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        .running-text, .countdown-text {
+            color: #000;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+        }
+        .event-footer {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            font-weight: bold;
+            padding-top: 5px;
+        }
+    </style>
+    
+    
+
+
+    <!-- css stack -->
+    </head>
+
+<body class="bg-gray-50"><a href="https://kickbd.com/cdn-cgi/content?id=AzL1cEFpN50XqitZNQ9eLuwru1J.ahrn2eqXRQIBtGU-1781414512.0808096-1.2.1.1-pDPqihsDQizL5hGdPELAyQedLHQIeVOWx6RskQGwRrU" aria-hidden="true" rel="nofollow noopener" style="display: none !important; visibility: hidden !important"></a>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<meta name="monetag" content="ddad690abf46f65c293f2e9f601957eb">
+<header class="bg-white shadow-md fixed w-full top-0 z-50">
+    <nav class="container mx-auto px-4 py-4">
+        <div class="flex justify-between items-center">
+            <a href="https://kickbd.com" class="flex items-center space-x-2">
+                
+                <span class="text-2xl font-bold gradient-text">KicKBD.Com</span>
+            </a>
+
+            <!-- Desktop Menu -->
+            <div class="hidden md:flex items-center space-x-6">
+                <a href="https://kickbd.com" class="nav-link active">Home</a>
+                <a href="/highlights" class="nav-link">Highlights</a>
+                <a href="/contact-us" class="nav-link">Contact</a>
+                <button class="btn btn-primary" onclick="window.location.href='https://t.me/kickbdcom'">Join TG</button>
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <button class="md:hidden" id="mobile-menu-button">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div class="mobile-menu hidden md:hidden" id="mobile-menu">
+            <div class="flex flex-col space-y-4 mt-4 pb-4">
+                <a href="https://kickbd.com" class="nav-link active">Home</a>
+                <a href="/highlights" class="nav-link">Highlights</a>
+                <a href="/contact-us" class="nav-link">Contact</a>
+              <button class="btn btn-primary" onclick="window.location.href='https://t.me/kickbdcom'">Join TG</button>
+            </div>
+        </div>
+    </nav>
+</header>
+        
+
+<style>
+    main.pt-20, main {
+        background-color: #f1f5f9 !important;
+        margin-top: -5px !important;
+        padding-top: calc(5rem + 5px) !important; /* pt-20 (5rem) ব্যালেন্স ফিক্স */
+        min-height: 100vh;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    }
+
+    #channelList button {
+        padding: 6px 14px;
+        font-size: 12px; 
+        font-weight: 700;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+    
+    #channelList button.btn-primary {
+        background: #2563eb !important;
+        color: #ffffff !important;
+        border-color: #2563eb !important;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    }
+
+    .info-card-item {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 12px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.2s ease;
+    }
+    .info-card-item:hover {
+        border-color: #cbd5e1;
+        background: #ffffff;
+    }
+
+    .event-card.live-match {
+        border-color: #10b981 !important;
+        box-shadow: 0 10px 25px rgba(16, 185, 129, 0.15) !important;
+        position: relative;
+        overflow: hidden;
+        animation: cardGlow 2s infinite alternate;
+    }
+
+    @keyframes cardGlow {
+        from { box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03); }
+        to { box-shadow: 0 10px 25px rgba(16, 185, 129, 0.25); }
+    }
+
+    .event-card.live-match .live-badge {
+        background-color: #ef4444 !important;
+        color: white !important;
+        padding: 4px 10px;
+        border-radius: 9999px;
+        font-size: 11px;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+        animation: pulseLive 1.5s infinite;
+    }
+
+    @keyframes pulseLive {
+        0% { transform: scale(1); box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3); }
+        50% { transform: scale(1.05); box-shadow: 0 2px 15px rgba(239, 68, 68, 0.5); }
+        100% { transform: scale(1); box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3); }
+    }
+
+    .event-card.live-match .team-logo {
+        border-color: #10b981 !important;
+        animation: logoPulse 2s infinite ease-in-out;
+    }
+
+    @keyframes logoPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.06); border-color: #34d399 !important; }
+    }
+
+    .event-card.live-match .running-text {
+        font-size: 11px !important;
+        color: #475569 !important;
+        font-weight: 700;
+        margin-top: 4px;
+    }
+    .target-tz {
+        font-size: 8px !important;
+        font-weight: 800 !important;
+        color: #64748b !important;
+        text-transform: uppercase;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        padding: 1px 4px !important;
+        border-radius: 4px !important;
+        letter-spacing: 0.02em;
+        display: inline-block;
+        margin-top: 0px !important;
+        margin-left: -4px !important;
+        line-height: 1.2;
+    }
+</style>
+
+<main class="pt-20">
+    <!-- Match Header Card -->
+    <div class="container mx-auto px-4 py-4 max-width-[1100px]">
+        <div class="w-full px-1">
+            <div class="event-card transition-all duration-300 border border-gray-200 bg-white p-5 rounded-2xl shadow-sm" data-link="https://kickbd.com/matches/fifa-world-cup-match">
+                <div class="flex items-center justify-between relative z-10">
+                    
+                    <!-- Team 1 -->
+                    <div class="team-container flex flex-col items-center w-1/3">
+                        <div class="team-logo w-14 h-14 rounded-full border border-gray-200 p-1 flex items-center justify-center bg-white shadow-sm transition-all duration-300">
+                            <img src="/storage/01KTHZH1N0HB0VPBJWXKZZTSMH.png" alt="Argentina" class="object-contain w-full h-full">
+                        </div>
+                        <p class="team-name text-sm font-extrabold text-gray-800 mt-2 text-center transition-colors duration-300"> 
+                            Argentina 
+                        </p>
+                    </div>
+
+                    <!-- Match Time & Live Status Area -->
+                   <div class="local-time-wrapper text-center flex-grow px-2 w-1/3 flex flex-col items-center justify-center min-h-[60px]" data-utc-time="2026-06-17T07:00:00+06:00">
+    <div class="flex items-center justify-center gap-3 mb-0">
+        <p class="target-time mb-0 font-black text-emerald-500 text-base tracking-tight"> 
+            07:00 AM 
+        </p>
+        <span class="target-tz m-0"></span>
+    </div>
+    <p class="target-date mb-1 text-gray-400 text-[11px] font-bold uppercase tracking-wider"> 
+        17 Jun 2026 
+    </p>
+    
+    <span class="countdown text-xs font-bold text-slate-700" 
+          data-time="2026-06-17T07:00:00+06:00" 
+          data-delete-after="130000400">
+          <span class="text-gray-400">⏳ Loading...</span>
+    </span>
+</div>
+                    
+                    <!-- Team 2 -->
+                    <div class="team-container flex flex-col items-center w-1/3">
+                        <div class="team-logo w-14 h-14 rounded-full border border-gray-200 p-1 flex items-center justify-center bg-white shadow-sm transition-all duration-300">
+                            <img src="/storage/01KTHZCGD681WEFJB47E1P57Q5.png" alt="Algeria" class="object-contain w-full h-full">
+                        </div>
+                        <p class="team-name text-sm font-extrabold text-gray-800 mt-2 text-center transition-colors duration-300"> 
+                            Algeria 
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Card Footer Tags -->
+                <div class="event-footer flex justify-between border-t border-gray-100 pt-3 mt-4 text-xs font-bold text-gray-600 relative z-10">
+                    <span class="bg-blue-50 text-blue-700 px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-sm">
+                        🏆  
+                    </span>
+                    <span class="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-sm">
+                        📺 <span id="footer-broadcaster"> </span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stream Container -->
+    <div class="container mx-auto px-4 max-width-[1100px]">
+                  <div style="max-width: 800px; margin: 25px auto; padding: 0 15px; font-family: system-ui, -apple-system, sans-serif;">
+    <div style="background: #fafafa; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+        
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 15px; border-b: 1px solid #f0f0f0; padding-bottom: 10px;">
+            <span style="font-size: 18px;">💡</span>
+            <h3 style="font-size: 13px; font-weight: 800; color: #374151; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">
+                Streaming Guidelines
+            </h3>
+        </div>
+
+        <div style="display: flex; flex-col; gap: 12px; flex-direction: column;">
+            
+            <div style="font-size: 14px; color: #4b5563; line-height: 1.6; margin: 0;">
+                <span style="color: #ef4444; font-weight: 800; margin-right: 4px;">[iPhone / iPad Users]:</span> 
+                Select the <strong style="color: #ef4444; font-weight: 800; text-decoration: underline;">iOS Player</strong> button above when streaming from any Apple device.
+            </div>
+
+            <div style="font-size: 14px; color: #4b5563; line-height: 1.6; margin: 0;">
+                <span style="color: #2563eb; font-weight: 800; margin-right: 4px;">[Other Devices]:</span> 
+                For Android, PC, or Smart TV browsing, please select <strong style="color: #111827; font-weight: 700;">Resolution: Auto</strong> inside the player settings.
+            </div>
+
+            <div style="font-size: 14px; color: #4b5563; line-height: 1.6; margin: 0;">
+                <span style="color: #059669; font-weight: 800; margin-right: 4px;">[Lagging / Buffering]:</span> 
+                If you experience buffering, try connecting to a reliable <strong style="color: #059669; font-weight: 700;">VPN</strong> to optimize your stream routing.
+            </div>
+
+        </div>
+    </div>
+</div>
+            <!-- Server Buttons -->
+            <div id="channelList" class="p-2 mb-3 flex flex-wrap justify-center gap-2"></div>
+            
+            <!-- Video Player Iframe Box -->
+            <div class="bg-black rounded-2xl overflow-hidden mb-6 relative shadow-lg border border-gray-800">
+                <iframe 
+                    src="https://kickbd.com/matches/iframe/fifa-world-cup-match"
+                    class="w-full aspect-video"
+                    id="my-iframe"
+                    frameborder="0" 
+                    allowfullscreen
+                    allow="autoplay; fullscreen"
+                ></iframe>
+            </div>
+        
+        <!-- Premium Match Information Grid Card Section -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="text-xl">ℹ️</span>
+                <h2 class="text-xl font-extrabold text-gray-800">Match Information</h2>
+            </div>
+            
+            <p class="text-gray-600 text-sm leading-relaxed mb-6 bg-slate-50 p-4 rounded-xl border border-dashed border-gray-200">
+                The exciting match between <strong class="text-gray-800">Argentina</strong> and <strong class="text-gray-800">Algeria</strong> is broadcast live. You can enjoy the full live stream coverage, real-time server updates, and multi-channel commentary right here dynamically.
+            </p>
+            
+            <!-- Modern Info Grid Cards instead of old layout -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div class="info-card-item">
+                    <span class="text-gray-500 font-semibold text-xs text-uppercase">Match Title</span>
+                    <span class="text-gray-800 font-bold text-sm">Football World Cup Match 17</span>
+                </div>
+                
+                <div class="info-card-item local-time-wrapper" data-utc-time="2026-06-17T07:00:00+06:00">
+    <span class="text-gray-500 font-semibold text-xs text-uppercase">Event Date</span>
+    <span class="target-date text-gray-800 font-bold text-sm">17 Jun 2026</span>
+</div>
+                
+                <div class="info-card-item local-time-wrapper" data-utc-time="2026-06-17T07:00:00+06:00">
+    <span class="text-gray-500 font-semibold text-xs text-uppercase">Kick-off Time</span>
+    <span class="target-time text-emerald-600 font-extrabold text-sm">07:00 AM</span>
+</div>
+                
+                <div class="info-card-item">
+                    <span class="text-gray-500 font-semibold text-xs text-uppercase">Category/Sport</span>
+                    <span class="text-blue-600 font-bold text-sm"> </span>
+                </div>
+                
+                <div class="info-card-item md:col-span-2">
+                    <span class="text-gray-500 font-semibold text-xs text-uppercase">Available Broadcasters</span>
+                    <span id="dynamic-broadcaster" class="text-gray-800 font-bold text-sm bg-gray-100 px-3 py-1 rounded-md text-xs"> </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Share Section -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
+            <h3 class="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <span>📢</span> Share this match with friends
+            </h3>
+            <div class="flex flex-wrap gap-2">
+                <a href="https://www.facebook.com/sharer.php?u=https://kickbd.com/matches/fifa-world-cup-match"
+                   target="_blank"
+                   class="px-4 py-2 rounded-xl text-xs font-bold bg-[#1877f2] text-white hover:bg-[#166fe5] transition-all flex items-center gap-2 shadow-sm">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                    Facebook
+                </a>
+                
+                <a href="https://twitter.com/intent/tweet?url=https://kickbd.com/matches/fifa-world-cup-match"
+                   target="_blank"
+                   class="px-4 py-2 rounded-xl text-xs font-bold bg-[#1da1f2] text-white hover:bg-[#1a91da] transition-all flex items-center gap-2 shadow-sm">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                    </svg>
+                    Twitter
+                </a>
+                
+                <a href="https://api.whatsapp.com/send?text=https://kickbd.com/matches/fifa-world-cup-match"
+                   class="px-4 py-2 rounded-xl text-xs font-bold bg-[#25d366] text-white hover:bg-[#22c35e] transition-all flex items-center gap-2 shadow-sm">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                    </svg>
+                    WhatsApp
+                </a>
+                
+                <a href="https://t.me/share/url?url=https://kickbd.com/matches/fifa-world-cup-match"
+                   class="px-4 py-2 rounded-xl text-xs font-bold bg-[#0088cc] text-white hover:bg-[#0077b3] transition-all flex items-center gap-2 shadow-sm">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18 1.897-.962 6.502-1.359 8.627-.168.9-.5 1.201-.82 1.23-.697.064-1.226-.461-1.901-.903-1.056-.692-1.653-1.123-2.678-1.799-1.185-.781-.417-1.21.258-1.911.177-.184 3.247-2.977 3.307-3.23.007-.032.015-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.139-5.062 3.345-.479.329-.913.489-1.302.481-.428-.009-1.252-.242-1.865-.44-.751-.245-1.349-.374-1.297-.789.027-.216.324-.437.893-.663 3.498-1.524 5.831-2.529 6.998-3.015 3.333-1.386 4.025-1.627 4.477-1.635.099-.002.321.023.465.141.12.098.153.228.166.349-.001.067.015.446-.005.563z"/>
+                    </svg>
+                    Telegram
+                </a>
+            </div>
+        </div>
+    </div>
+    <br>
+</main>
+
+
+        <footer class="bg-gray-900 text-white py-12">
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+                <h3 class="text-xl font-bold mb-4">KicKBD.Com</h3>
+					<p class="text-gray-400">Your ultimate front-row seat to world football. Stream high-definition match highlights, live events, and expert analytical summaries seamlessly on any device.</p>
+            </div>
+            <div>
+                <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
+                <ul class="space-y-2">
+                    <li><a href="https://kickbd.com" class="text-gray-400 hover:text-white">Home</a></li>
+                    <li><a href="/highlights" class="text-gray-400 hover:text-white">Highlights</a></li>
+                    <li><a href="/matches/upcoming" class="text-gray-400 hover:text-white">Upcoming</a></li> 
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-lg font-semibold mb-4">Support</h4>
+                <ul class="space-y-2">
+                                            <li><a href="/about" class="text-gray-400 hover:text-white">About</a></li>
+                                            <li><a href="/contact-us" class="text-gray-400 hover:text-white">Contact us</a></li>
+                                            <li><a href="/privacy-policy" class="text-gray-400 hover:text-white">Privacy &amp; policy</a></li>
+                                         
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-lg font-semibold mb-4">Connect With Us</h4>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-400 hover:text-white">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="border-t border-gray-800 mt-12 pt-8 text-center">
+           <p class="text-gray-400">&copy; 2026 KicKBD.Com. All rights reserved.</p>
+        </div>
+    </div>
+    
+ <a href="https://t.me/kickbdcom" rel="nofollow" target="_blank" class="btn-call">
+	  	<div class="btn-call__ico">
+	  		<i class="fab fa-telegram-plane"></i>
+	  	</div>
+	  </a>   
+    
+   <style>
+/* Post Thumb Icon */
+article.post figure .thumb-icon {
+    width: 25px;
+    height: 25px;
+    bottom: 10px;
+    left: 10px;
+    position: absolute;
+}
+article.post figure .thumb-icon i {
+    font-size: 13px;
+    padding: 6px 0;
+    width: 18px;
+    margin-left: -2px;
+}
+.cat-list-img {
+    display: block;
+    margin: 10px 15px;
+}
+
+/* Telegram Floating Button */
+.btn-call {
+    background: #38a3fd;
+    border: 2px solid #38a3fd;
+    border-radius: 50%;
+    box-shadow: 0 8px 10px rgb(56 163 253 / .3);
+    cursor: pointer;
+    height: 60px;
+    width: 60px;
+    text-align: center;
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 999;
+    transition: .3s ease-in-out;
+    -webkit-animation: hoverWave linear 1s infinite;
+    animation: hoverWave linear 1s infinite;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+}
+
+/* Hover Effect */
+.btn-call:hover {
+    background: #1c82e2;
+    border-color: #1c82e2;
+    transform: scale(1.1);
+    box-shadow: 0 10px 15px rgba(28,130,226,.4);
+}
+
+.btn-call__ico {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: shake 1200ms ease infinite;
+    color: #fff;
+    font-size: 30px;
+    padding-top: 3px;
+    transition: .3s all;
+}
+
+/* Wave Animation */
+@-webkit-keyframes hoverWave {
+    0% { box-shadow: 0 8px 10px rgb(56 163 253 / .3),0 0 0 0 rgb(56 163 253 / .2),0 0 0 0 rgb(56 163 253 / .2) }
+    40% { box-shadow: 0 8px 10px rgb(56 163 253 / .3),0 0 0 15px rgb(56 163 253 / .2),0 0 0 0 rgb(56 163 253 / .2) }
+    80% { box-shadow: 0 8px 10px rgb(56 163 253 / .3),0 0 0 30px transparent,0 0 0 26.7px rgb(56 163 253 / .067) }
+    100% { box-shadow: 0 8px 10px rgb(56 163 253 / .3),0 0 0 30px transparent,0 0 0 40px transparent }
+}
+@keyframes hoverWave {
+    0% { box-shadow: 0 8px 10px rgb(56 163 253 / .3),0 0 0 0 rgb(56 163 253 / .2),0 0 0 0 rgb(56 163 253 / .2) }
+    40% { box-shadow: 0 8px 10px rgb(56 163 253 / .3),0 0 0 15px rgb(56 163 253 / .2),0 0 0 0 rgb(56 163 253 / .2) }
+    80% { box-shadow: 0 8px 10px rgb(56 163 253 / .3),0 0 0 30px transparent,0 0 0 26.7px rgb(56 163 253 / .067) }
+    100% { box-shadow: 0 8px 10px rgb(56 163 253 / .3),0 0 0 30px transparent,0 0 0 40px transparent }
+}
+
+/* Shake Animation */
+@keyframes shake {
+    0%   { transform: rotateZ(0deg); }
+    25%  { transform: rotateZ(5deg); }
+    50%  { transform: rotateZ(0deg); }
+    75%  { transform: rotateZ(-5deg); }
+    100% { transform: rotateZ(0deg); }
+}
+</style> 
+   
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-50454MFCM5"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-50454MFCM5');
+</script>
+<script type="text/javascript">
+(function() {
+    document.addEventListener('click', function(event) {
+        var storageKey = 'kickbd_group_visited';
+        var now = new Date().getTime();
+        var lastVisit = localStorage.getItem(storageKey);
+        var twentyFourHours = 86400000; 
+
+        if (!lastVisit || (now - lastVisit > twentyFourHours)) {
+            localStorage.setItem(storageKey, now);
+            
+            // Redirects in the exact same tab - impossible to block
+            window.location.href = 'https://www.facebook.com/groups/kickbdcommunity/';
+        }
+    });
+})();
+</script>
+<script>(function(s){s.dataset.zone='11137077',s.src='https://llvpn.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+</footer>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script type="module" src="/js/script.js"></script>
+   
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        function convertSinglePageLocalTime() {
+            let countryName = 'BD';
+            try {
+                const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                if (tz && tz.includes('/')) {
+                    countryName = tz.split('/')[1].replace(/_/g, ' ');
+                }
+            } catch (e) { countryName = 'LOCAL'; }
+
+            document.querySelectorAll('.local-time-wrapper').forEach(function (wrapper) {
+                const utcString = wrapper.getAttribute('data-utc-time');
+                if (!utcString) return;
+                
+                const localDate = new Date(utcString);
+                if (isNaN(localDate.getTime())) return;
+
+                const dateStr = localDate.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' });
+                const timeStr = localDate.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true });
+
+                const targetTime = wrapper.querySelector('.target-time');
+                const targetDate = wrapper.querySelector('.target-date');
+                const targetTz = wrapper.querySelector('.target-tz');
+
+                if (targetTime) targetTime.innerText = timeStr;
+                if (targetDate) targetDate.innerText = dateStr;
+                if (targetTz) targetTz.innerText = `${countryName}`;
+            });
+        }
+        convertSinglePageLocalTime();
+        
+        const iframe = document.getElementById('my-iframe');
+        const channelList = document.getElementById('channelList');
+        
+        const dynamicBroadcaster = document.getElementById('dynamic-broadcaster');
+        const footerBroadcaster = document.getElementById('footer-broadcaster');
+        
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'channels') {
+                var channels = event.data.data.channels;
+                var html = '';
+                let i = 0;
+                
+                let allSourceNames = [];
+
+                for (const [key, value] of Object.entries(channels)) {
+                    allSourceNames.push(key);
+                    
+                    html += `<button
+                        data-channel="${key}"
+                        class="chngcnl btn bg-white ${i === 0 ? 'btn-primary' : ''} text-gray-700 border border-gray-200 hover:bg-gray-50 transform hover:scale-105 transition-all">${key}</button>
+                    `;
+                    i++;
+                }
+                channelList.innerHTML = html;
+
+                if (allSourceNames.length > 0) {
+                    let formattedSources = allSourceNames.join(', ');
+                    if (dynamicBroadcaster) dynamicBroadcaster.innerText = formattedSources;
+                    if (footerBroadcaster) footerBroadcaster.innerText = formattedSources;
+                }
+            }
+        });
+
+        channelList.addEventListener('click', function(e) {
+            if (e.target.classList.contains('chngcnl')) {
+                var channel = e.target.getAttribute('data-channel');
+                var buttons = document.querySelectorAll('.chngcnl');
+                buttons.forEach(function(btn) {
+                    btn.classList.remove('btn-primary');
+                });
+                e.target.classList.add('btn-primary');
+                if (dynamicBroadcaster) dynamicBroadcaster.innerText = channel;
+                if (footerBroadcaster) footerBroadcaster.innerText = channel;
+
+                iframe.contentWindow.postMessage({
+                    type: 'changeChannel',
+                    data: {
+                        channel: channel
+                    }
+                }, '*');
+            }
+        });
+    });
+</script>
+<script>
+function updateCountdown() {
+    const countdowns = document.querySelectorAll('.countdown');
+    const now = new Date().getTime();
+
+    countdowns.forEach(countdown => {
+        const startTime = new Date(countdown.getAttribute('data-time')).getTime();
+        const endTimeAttr = countdown.getAttribute('data-end-time');
+        const endTime = endTimeAttr ? new Date(endTimeAttr).getTime() : null;
+        const deleteAfter = parseInt(countdown.getAttribute('data-delete-after')) * 1000;
+        const expireTime = endTime || (startTime + deleteAfter);
+        const diff = startTime - now;
+        const eventCard = countdown.closest('.event-card');
+
+        // Hide card if past end time
+        if (endTime && now >= endTime) {
+            eventCard.style.display = 'none';
+            return;
+        }
+
+        // Update live vs upcoming
+        if (diff > 0) {
+            eventCard.classList.remove('live-match');
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            countdown.innerHTML = `<div class="countdown-text">⏳ ${days}D : ${hours}H : ${minutes}M : ${seconds}S</div>`;
+        } else {
+            const elapsed = now - startTime;
+            const hours = Math.floor(elapsed / (1000 * 60 * 60));
+            const minutes = Math.floor((elapsed % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((elapsed % (1000 * 60)) / 1000);
+            countdown.innerHTML = `<div class="live-badge">🛑 Live</div><div class="running-text">Running: ${hours}H : ${minutes}M : ${seconds}S</div>`;
+
+            eventCard.classList.add('live-match');
+            eventCard.style.cursor = 'pointer';
+            eventCard.onclick = () => window.location.href = eventCard.getAttribute('data-link');
+
+            if (!eventCard.querySelector('.ripple-effect')) {
+                let ripple = document.createElement('div');
+                ripple.classList.add('ripple-effect');
+                eventCard.appendChild(ripple);
+            }
+
+            if (!eventCard.dataset.rotating) {
+                eventCard.dataset.rotating = "true";
+                let angle = 0;
+                function rotateBorder() {
+                    angle += 0.005; 
+                    if (angle >= 1) angle = 0; 
+                    eventCard.style.setProperty('--border-angle', `${angle}turn`);
+                    requestAnimationFrame(rotateBorder);
+                }
+                rotateBorder();
+            }
+        }
+
+        // Hide card if deleteAfter exceeded
+        if (!endTime && now > expireTime) {
+            eventCard.style.display = 'none';
+        }
+    });
+}
+
+// On page load
+document.addEventListener('DOMContentLoaded', () => {
+    updateCountdown();
+});
+
+// Update every second
+setInterval(updateCountdown, 1000);
+</script>
+
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a0b6e4dc7efd72da',t:'MTc4MTQxNDUxMg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

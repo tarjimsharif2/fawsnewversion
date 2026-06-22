@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+/* Force custom overlays inside Shaka Player container to stay on top in all states (including fullscreen) */
+.shaka-video-container .custom-overlay {
+  z-index: 2147483647 !important;
+  pointer-events: none !important;
+}

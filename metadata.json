@@ -1,0 +1,8 @@
+{
+  "name": "fawnewsNEWversion",
+  "description": "A full-stack template demonstrating how to schedule and execute automated web scraping.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
