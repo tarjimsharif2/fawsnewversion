@@ -113,8 +113,8 @@ export default function MatchPage({ data, loading, currentTime }: { data: any, l
               {match.servers.map((server: any) => {
                  const serverSlug = serverSlugs[server.id];
                  return (
-                   <Link
-                     to={`/${matchSlug}/${serverSlug}`}
+                   <a
+                     href={`/${matchSlug}/${serverSlug}`}
                      key={server.id}
                      className="flex items-center justify-between p-4 rounded-xl border-2 text-left transition-all relative overflow-hidden bg-[#151923] border-white/5 hover:bg-[#1a1f2b] hover:border-purple-600/80"
                    >
@@ -128,7 +128,7 @@ export default function MatchPage({ data, loading, currentTime }: { data: any, l
                        </div>
                      </div>
                      <span className={`text-[11px] font-bold px-2 py-1.5 rounded-md bg-[#212631] text-slate-400`}>AQ</span>
-                   </Link>
+                   </a>
                  );
               })}
             </div>

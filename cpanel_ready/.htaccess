@@ -1,3 +1,9 @@
+RewriteEngine On
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^([a-zA-Z0-9-]+)/(server-[a-zA-Z0-9-]+)/?$ player.php?match=$1&server=$2 [QSA,L]
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /

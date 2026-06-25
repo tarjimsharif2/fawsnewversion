@@ -1,4 +1,6 @@
 <?php
+error_reporting(0);
+ini_set('display_errors', '0');
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 
@@ -47,7 +49,8 @@ function fetchMatches() {
     $url = 'http://www.fawanews.sc/';
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
     ]);
@@ -76,7 +79,7 @@ function fetchMatches() {
             $href = strpos($hrefRaw, 'http') === 0 ? $hrefRaw : "http://www.fawanews.sc/" . ltrim($hrefRaw, '/');
             if (strpos($href, '.html') === false) continue;
             
-            $slug = str_replace('.html', '', $hrefRaw);
+            $slug = str_replace('.html', '', ltrim(parse_url($hrefRaw, PHP_URL_PATH), '/'));
             if (isset($uniqueMatches[$slug])) continue;
             $uniqueMatches[$slug] = true;
             
@@ -198,29 +201,37 @@ function fetchMatches() {
                 $matchRes = curl_multi_getcontent($ch);
                 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
                 
-                if ($httpCode == 200 && $matchRes && preg_match('/var\s+videos\s*=\s*(\[.*?\])/s', $matchRes, $m)) {
-                    $jsonStr = str_replace("'", '"', $m[1]);
-                    $jsonStr = preg_replace('/,\s*\]/', ']', $jsonStr);
-                    $videos = json_decode($jsonStr, true);
-                    if (is_array($videos) && count($videos) > 0) {
-                        $streamUrl = $videos[0];
-                        if ($streamUrl) {
-                            $isDash = strpos($streamUrl, '.mpd') !== false;
-                            $suffixLabel = $task['suffix'] ? " ({$task['suffix']})" : '';
-                            
-                            $matchesToProcess[$task['slug']]['extractedServers'][] = [
-                                'name' => "Stream" . $suffixLabel,
-                                'url' => $task['url'],
-                                'streamUrl' => $streamUrl,
-                                'externalUrl' => '',
-                                'type' => $isDash ? 'dash' : 'm3u8',
-                                'quality' => 'Auto',
-                                'headers' => ['Referer' => 'http://www.fawanews.sc/'],
-                                'drm' => null,
-                                'drmKey' => null,
-                                'isWorking' => true
-                            ];
+                if ($httpCode == 200 && $matchRes) {
+                    $streamUrl = '';
+                    if (preg_match('/var\s+videos\s*=\s*(\[.*?\])/s', $matchRes, $m)) {
+                        $jsonStr = str_replace("'", '"', $m[1]);
+                        $jsonStr = preg_replace('/,\s*\]/', ']', $jsonStr);
+                        $videos = json_decode($jsonStr, true);
+                        if (is_array($videos) && count($videos) > 0) {
+                            $streamUrl = $videos[0];
                         }
+                    }
+                    if (empty($streamUrl) && preg_match('/<iframe[^>]+src=["\']([^"\']+)["\']/i', $matchRes, $m)) {
+                        $streamUrl = $m[1];
+                    }
+                    
+                    if ($streamUrl) {
+                        $isDash = strpos($streamUrl, '.mpd') !== false;
+                        $isIframe = !empty($streamUrl) && (strpos($streamUrl, '/embed') !== false || substr($streamUrl, -5) === '.html' || substr($streamUrl, -4) === '.php');
+                        $suffixLabel = $task['suffix'] ? " ({$task['suffix']})" : '';
+                        
+                        $matchesToProcess[$task['slug']]['extractedServers'][] = [
+                            'name' => "Stream" . $suffixLabel,
+                            'url' => $task['url'],
+                            'streamUrl' => $streamUrl,
+                            'externalUrl' => '',
+                            'type' => $isIframe ? 'iframe' : ($isDash ? 'dash' : 'm3u8'),
+                            'quality' => 'Auto',
+                            'headers' => ['Referer' => 'http://www.fawanews.sc/'],
+                            'drm' => null,
+                            'drmKey' => null,
+                            'isWorking' => true
+                        ];
                     }
                 }
                 curl_multi_remove_handle($mh, $ch);
@@ -306,7 +317,7 @@ if (!file_exists($cacheFile) || (time() - filemtime($cacheFile)) >= $cacheTime) 
 }
 
 $requestUri = $_SERVER['REQUEST_URI'] ?? '';
-$isMatchJson = strpos($requestUri, 'match.json') !== false;
+$isMatchJson = strpos($requestUri, 'match.json') !== false || (isset($_GET['action']) && $_GET['action'] == 'match.json');
 
 $isProxy = (isset($_GET['action']) && $_GET['action'] == 'proxy') || strpos($requestUri, 'proxy') !== false;
 
@@ -540,4 +551,3 @@ if ($isMatchJson) {
     // Regular /api/matches output
     echo json_encode($cached);
 }
-
