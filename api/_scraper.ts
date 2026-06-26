@@ -34,19 +34,14 @@ export const runScraper = async () => {
 
         try {
             console.log("Fetching fawanews");
+            let htmlData = '';
             let res = await axios.get('http://www.fawanews.sc/', {
                 headers: {
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                 },
-                timeout: 8000
+                timeout: 25000 // Increased timeout, no proxy fallback
             });
-            
-            let htmlData = res.data;
-            if (typeof htmlData === 'string' && (htmlData.includes('webadmin/deny') || !htmlData.includes('user-item'))) {
-                console.log("Blocked by ISP or no items, trying fallback proxy...");
-                res = await axios.get('https://api.allorigins.win/raw?url=' + encodeURIComponent('http://www.fawanews.sc/'), { timeout: 10000 });
-                htmlData = res.data;
-            }
+            htmlData = res.data;
             
             const $ = cheerio.load(htmlData);
             const matchesToProcess: any[] = [];
@@ -144,14 +139,17 @@ export const runScraper = async () => {
                     const linkPromises = match.fawaLinks.map(async (linkObj: any) => {
                         try {
                             let fetchUrl = linkObj.href.replace(/ /g, '%20');
-                            let matchRes = await axios.get(fetchUrl, { timeout: 8000, validateStatus: () => true });
-                            let html = matchRes.data;
-                            if (typeof html === 'string' && html.includes('webadmin/deny')) {
-                                matchRes = await axios.get('https://api.allorigins.win/raw?url=' + encodeURIComponent(fetchUrl), { timeout: 10000, validateStatus: () => true });
+                            let html = '';
+                            let matchResStatus = 0;
+                            try {
+                                let matchRes = await axios.get(fetchUrl, { timeout: 25000, validateStatus: () => true });
                                 html = matchRes.data;
+                                matchResStatus = matchRes.status;
+                            } catch (e: any) {
+                                console.log("Error fetching match directly:", e.message);
                             }
 
-                            if (matchRes.status === 200 && typeof html === 'string') {
+                            if (matchResStatus === 200 && typeof html === 'string') {
                                 const videoMatch = html.match(/var\s+videos\s*=\s*(\[.*?\])/s);
                                 
                                 if (videoMatch) {
@@ -246,7 +244,7 @@ export const runScraper = async () => {
                         };
                         const p = axios.get(targetUrl, {
                             headers: { ...defaultHeaders, ...(server.headers || {}) },
-                            timeout: 8000,
+                            timeout: 15000,
                             responseType: 'text',
                             validateStatus: (status) => status < 500
                         }).then(async (res) => {
