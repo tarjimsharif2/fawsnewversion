@@ -198,34 +198,21 @@ export const ShakaPlayer = ({
 
       // Register request filter for proxy / headers
       const apiUrl = import.meta.env.VITE_API_URL || '';
+      
+      let finalSrc = src;
+      if (src.startsWith('http://') || src.startsWith('https://')) {
+          const headersQuery = parsedHeaders && Object.keys(parsedHeaders).length > 0 ? '&headers=' + encodeURIComponent(JSON.stringify(parsedHeaders)) : '';
+          finalSrc = `${apiUrl}/api/proxy?url=${encodeURIComponent(src)}${headersQuery}`;
+      }
 
       player
         .getNetworkingEngine()
         .registerRequestFilter((type: any, request: any) => {
-          if (type === shaka.net.NetworkingEngine.RequestType.LICENSE) {
-            // For license requests, append auth headers, but do not proxy
-            if (parsedHeaders) {
-              for (const [k, v] of Object.entries(parsedHeaders)) {
-                request.headers[k] = v;
-              }
+          if (parsedHeaders) {
+            for (const [k, v] of Object.entries(parsedHeaders)) {
+              request.headers[k] = v;
             }
-            return;
           }
-
-          if (!request.uris || request.uris.length === 0) return;
-
-          request.uris = request.uris.map((originalUri: string) => {
-            console.log("[Shaka Request]", originalUri);
-            if (originalUri.includes("/api/proxy?url=")) {
-               return originalUri; // Already proxied
-            }
-            if (originalUri.startsWith("http://") || originalUri.includes("fawanews") || originalUri.includes("193.47")) {
-               const proxyHeaders = { ...parsedHeaders, 'Referer': 'http://www.fawanews.sc/' };
-               const baseUrl = window.location.origin;
-               return `${baseUrl}/api/proxy?url=${encodeURIComponent(originalUri)}&headers=${encodeURIComponent(JSON.stringify(proxyHeaders))}`;
-            }
-            return originalUri;
-          });
         });
 
       player
@@ -432,7 +419,7 @@ export const ShakaPlayer = ({
       (video as any)._shakaSyncListener = syncToLiveEdge;
 
       const mimeType = type === 'dash' ? 'application/dash+xml' : (type === 'hls' ? 'application/x-mpegURL' : undefined);
-      await player.load(src, undefined, mimeType);
+      await player.load(finalSrc, undefined, mimeType);
       
       if (currentInitId !== initIdRef.current) return;
 

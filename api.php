@@ -79,7 +79,7 @@ function fetchMatches() {
             $href = strpos($hrefRaw, 'http') === 0 ? $hrefRaw : "http://www.fawanews.sc/" . ltrim($hrefRaw, '/');
             if (strpos($href, '.html') === false) continue;
             
-            $slug = str_replace('.html', '', $hrefRaw);
+            $slug = str_replace('.html', '', ltrim(parse_url($hrefRaw, PHP_URL_PATH), '/'));
             if (isset($uniqueMatches[$slug])) continue;
             $uniqueMatches[$slug] = true;
             
@@ -317,7 +317,7 @@ if (!file_exists($cacheFile) || (time() - filemtime($cacheFile)) >= $cacheTime) 
 }
 
 $requestUri = $_SERVER['REQUEST_URI'] ?? '';
-$isMatchJson = strpos($requestUri, 'match.json') !== false;
+$isMatchJson = strpos($requestUri, 'match.json') !== false || (isset($_GET['action']) && $_GET['action'] == 'match.json');
 
 $isProxy = (isset($_GET['action']) && $_GET['action'] == 'proxy') || strpos($requestUri, 'proxy') !== false;
 
@@ -347,6 +347,12 @@ if ($isProxy) {
             }
         }
     }
+    
+    // Pass the Range header if requested by the player
+    if (isset($_SERVER['HTTP_RANGE'])) {
+        $headers[] = "Range: " . $_SERVER['HTTP_RANGE'];
+    }
+    
     if (empty($headers)) {
         $headers[] = "Referer: http://www.fawanews.sc/";
     }
@@ -359,34 +365,32 @@ if ($isProxy) {
     
     $isMpeg = strpos($targetUrl, '.m3u8') !== false || strpos($targetUrl, '.mpd') !== false;
 
-    // Pass along HTTP headers for streams (Content-Type etc)
-    curl_setopt($ch, CURLOPT_HEADERFUNCTION, function($curl, $header) use ($targetUrl, $isMpeg) {
-        $len = strlen($header);
-        $headerParts = explode(':', $header, 2);
-        if (count($headerParts) < 2) return $len;
-        
-        $name = strtolower(trim($headerParts[0]));
-        $value = trim($headerParts[1]);
-        if (in_array($name, ['content-type', 'cache-control', 'expires', 'last-modified', 'etag', 'accept-ranges'])) {
-             header($name . ': ' . $value);
-        }
-        return $len;
-    });
-
     if (!$isMpeg) {
-        // Stream directly to memory buffer for .ts / .mp4 segments to drastically save memory
+        // Stream directly to output for .ts / .mp4 segments to drastically save memory and CPU
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
+        curl_setopt($ch, CURLOPT_HEADERFUNCTION, function($curl, $header) {
+            $len = strlen($header);
+            $headerParts = explode(':', $header, 2);
+            if (count($headerParts) < 2) return $len;
+            $name = strtolower(trim($headerParts[0]));
+            $value = trim($headerParts[1]);
+            if (in_array($name, ['content-type', 'content-length', 'cache-control', 'accept-ranges', 'content-range'])) {
+                 header($name . ': ' . $value);
+            }
+            return $len;
+        });
+        
         $headersSentFlag = false;
         curl_setopt($ch, CURLOPT_WRITEFUNCTION, function($ch, $chunk) use (&$headersSentFlag) {
             if (!$headersSentFlag) {
                 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
                 http_response_code($httpCode);
                 header("Access-Control-Allow-Origin: *");
+                header("Access-Control-Expose-Headers: Content-Length, Content-Range, Date, Server, Transfer-Encoding");
                 $headersSentFlag = true;
             }
             echo $chunk;
-            ob_flush();
-            flush(); 
+            flush(); // Send to client immediately
             return strlen($chunk);
         });
         curl_exec($ch);
@@ -394,12 +398,30 @@ if ($isProxy) {
         exit;
     }
 
+    curl_setopt($ch, CURLOPT_HEADERFUNCTION, function($curl, $header) {
+        $len = strlen($header);
+        $headerParts = explode(':', $header, 2);
+        if (count($headerParts) < 2) return $len;
+        
+        $name = strtolower(trim($headerParts[0]));
+        $value = trim($headerParts[1]);
+        if (in_array($name, ['content-type', 'content-length', 'cache-control', 'accept-ranges', 'content-range'])) {
+             header($name . ': ' . $value);
+        }
+        return $len;
+    });
+
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
     
     http_response_code($httpCode);
     header("Access-Control-Allow-Origin: *");
+    
+    if (!$isMpeg && strpos($response, '#EXTM3U') === false) {
+        echo $response;
+        exit;
+    }
     
     if ($isMpeg || strpos($response, '#EXTM3U') !== false) {
         $baseUrl = substr($targetUrl, 0, strrpos($targetUrl, '/') + 1);
@@ -412,7 +434,8 @@ if ($isProxy) {
         $lines = explode("\n", $response);
         $rewritten = [];
         
-        $myProxyBase = "/api.php?action=proxy&url=";
+        $scriptName = $_SERVER['SCRIPT_NAME'] ?? '/api.php';
+        $myProxyBase = $scriptName . "?action=proxy&url=";
         if (strpos($requestUri, '/api/proxy') !== false) {
              $myProxyBase = "/api/proxy?url=";
         }
@@ -425,25 +448,26 @@ if ($isProxy) {
                 continue;
             }
             if (strpos($t, '#') === 0) {
-                 // Rewrite URI inside #EXT-X tags
+                 // Rewrite URI inside #EXT-X tags (for sub-playlists, etc.)
                  if (preg_match('/URI="(.*?)"/', $t, $m)) {
                       $uri = $m[1];
                       if (strpos($uri, 'http') === 0) {
-                          $rewritten[] = $line;
+                          $newUri = $myProxyBase . urlencode($uri) . $headerP;
                       } else if (strpos($uri, '/') === 0) {
-                          $rewritten[] = preg_replace('/URI="(.*?)"/', 'URI="' . $rootUrl . $uri . '"', $line);
+                          $newUri = $myProxyBase . urlencode($rootUrl . $uri) . $headerP;
                       } else {
-                          $rewritten[] = preg_replace('/URI="(.*?)"/', 'URI="' . $baseUrl . $uri . '"', $line);
+                          $newUri = $myProxyBase . urlencode($baseUrl . $uri) . $headerP;
                       }
+                      $rewritten[] = preg_replace('/URI="(.*?)"/', 'URI="' . $newUri . '"', $line);
                  } else {
                       $rewritten[] = $line;
                  }
             } else if (strpos($t, 'http') === 0) {
-                 $rewritten[] = $line;
+                 $rewritten[] = $myProxyBase . urlencode($t) . $headerP;
             } else if (strpos($t, '/') === 0) {
-                 $rewritten[] = $rootUrl . $t;
+                 $rewritten[] = $myProxyBase . urlencode($rootUrl . $t) . $headerP;
             } else {
-                 $rewritten[] = $baseUrl . $t;
+                 $rewritten[] = $myProxyBase . urlencode($baseUrl . $t) . $headerP;
             }
         }
         $response = implode("\n", $rewritten);
@@ -564,4 +588,3 @@ if ($isMatchJson) {
     // Regular /api/matches output
     echo json_encode($cached);
 }
-

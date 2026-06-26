@@ -1,12 +1,38 @@
 <?php
 error_reporting(0);
 ini_set('display_errors', '0');
+
+// Referer Protection
+$allowedReferers = [
+    $_SERVER['HTTP_HOST'],
+    "eplayhd.fun",
+    "cricfoots.com",
+    "aistudio.google.com" // allow AI studio for testing
+];
+
+if (isset($_SERVER['HTTP_REFERER'])) {
+    $refererHost = parse_url($_SERVER['HTTP_REFERER'], PHP_URL_HOST);
+    
+    // Check if the referer host ends with any of the allowed domains
+    $isAllowed = false;
+    foreach ($allowedReferers as $allowed) {
+        if (strpos($refererHost, $allowed) !== false || $refererHost === $allowed) {
+            $isAllowed = true;
+            break;
+        }
+    }
+    
+    if (!$isAllowed) {
+        die('<h1 style="color: red; text-align: center; margin-top: 50px;">Access Denied</h1><p style="color: orange; text-align: center;">Your domain is not authorized to play this stream.</p>');
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer" />
     <title>Stream Player</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.1/shaka-player.ui.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.1/controls.min.css">
@@ -21,8 +47,8 @@ ini_set('display_errors', '0');
 </head>
 <body>
     <div id="loading">Loading stream...</div>
-    <div id="video-container" data-shaka-player-container>
-        <video id="video" autoplay playsinline crossorigin="anonymous" data-shaka-player></video>
+    <div id="video-container">
+        <video id="video" autoplay playsinline crossorigin="anonymous"></video>
         <div id="watermark"><img src="https://i.ibb.co/Q3rp8ZXs/20260203-180035-0000.png" alt="Watermark"></div>
     </div>
 
@@ -60,7 +86,7 @@ ini_set('display_errors', '0');
 
         async function initPlayer() {
             try {
-                const res = await fetch('/api.php?action=matches');
+                const res = await fetch('api.php?action=matches');
                 const data = await res.json();
                 
                 if (!data || !data.matches) {
@@ -117,6 +143,7 @@ ini_set('display_errors', '0');
                 }
 
                 const video = document.getElementById('video');
+                const videoContainer = document.getElementById('video-container');
 
                 shaka.polyfill.installAll();
                 if (!shaka.Player.isBrowserSupported()) {
@@ -125,15 +152,10 @@ ini_set('display_errors', '0');
                     return;
                 }
 
-                // Wait for shaka UI to initialize
-                const waitForUI = setInterval(async () => {
-                    if (video.ui) {
-                        clearInterval(waitForUI);
-                        const ui = video.ui;
-                        const controls = ui.getControls();
-                        const player = controls.getPlayer();
-                        
-                        ui.configure({
+                const player = new shaka.Player(video);
+                const ui = new shaka.ui.Overlay(player, videoContainer, video);
+                
+                ui.configure({
                     controlPanelElements: [
                         "play_pause",
                         "time_and_duration",
@@ -229,6 +251,12 @@ ini_set('display_errors', '0');
 
                 player.configure(playerConfig);
 
+                let finalStreamUrl = streamUrl;
+                if (streamUrl.startsWith('http://') || streamUrl.startsWith('https://')) {
+                    const headersQuery = server.headers ? '&headers=' + encodeURIComponent(JSON.stringify(server.headers)) : '';
+                    finalStreamUrl = `api.php?action=proxy&url=${encodeURIComponent(streamUrl)}${headersQuery}`;
+                }
+
                 player.getNetworkingEngine().registerRequestFilter((type, request) => {
                     if (type === shaka.net.NetworkingEngine.RequestType.LICENSE) {
                         if (server.headers) {
@@ -236,25 +264,7 @@ ini_set('display_errors', '0');
                                 request.headers[key] = value;
                             }
                         }
-                        return;
                     }
-
-                    if (!request.uris || request.uris.length === 0) return;
-
-                    request.uris = request.uris.map((originalUri) => {
-                        if (originalUri.includes("/api.php?action=proxy") || originalUri.includes("/api/proxy")) {
-                            return originalUri;
-                        }
-                        if (originalUri.startsWith("http://") || originalUri.startsWith("https://")) {
-                            const proxyHeaders = { ...server.headers };
-                            if (originalUri.includes("fawanews") || originalUri.includes("193.47")) {
-                                proxyHeaders['Referer'] = 'http://www.fawanews.sc/';
-                            }
-                            const baseUrl = window.location.origin;
-                            return `${baseUrl}/api.php?action=proxy&url=${encodeURIComponent(originalUri)}&headers=${encodeURIComponent(JSON.stringify(proxyHeaders))}`;
-                        }
-                        return originalUri;
-                    });
                 });
 
                 player.addEventListener('error', (event) => {
@@ -268,7 +278,7 @@ ini_set('display_errors', '0');
                     const isHls = streamUrl.includes('.m3u8') || server.type === 'm3u8' || server.type === 'hls' || (!isDash && !isIframe);
                     const mimeType = isDash ? 'application/dash+xml' : (isHls ? 'application/x-mpegURL' : undefined);
                     
-                    await player.load(streamUrl, undefined, mimeType);
+                    await player.load(finalStreamUrl, undefined, mimeType);
                     document.getElementById('loading').style.display = 'none';
                     
                     video.muted = true;
@@ -290,8 +300,6 @@ ini_set('display_errors', '0');
                     document.getElementById('loading').innerText = 'Error loading video: ' + e.message;
                     document.getElementById('loading').style.display = 'block';
                 }
-                    }
-                }, 100);
 
             } catch (err) {
                 console.error(err);

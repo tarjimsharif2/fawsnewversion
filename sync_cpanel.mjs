@@ -38,6 +38,7 @@ if (fs.existsSync('dist/assets')) {
         content = content.replace(/\/api\/proxy\?url=/g, '/api.php?action=proxy&url=');
         content = content.replace(/\/api\/scrape/g, '/api.php?action=scrape');
         content = content.replace(/\/api\/match\.json/g, '/api.php?action=match.json');
+        content = content.replace(/\/api\/log/g, '/api.php?action=log');
         fs.writeFileSync(`cpanel_ready/assets/${file}`, content);
     }
     
@@ -60,6 +61,7 @@ if (fs.existsSync('dist/assets')) {
         content = content.replace(/\/api\/proxy\?url=/g, '/api.php?action=proxy&url=');
         content = content.replace(/\/api\/scrape/g, '/api.php?action=scrape');
         content = content.replace(/\/api\/match\.json/g, '/api.php?action=match.json');
+        content = content.replace(/\/api\/log/g, '/api.php?action=log');
         fs.writeFileSync(`cpanel_ready_script/assets/${file}`, content);
     }
     

@@ -305,7 +305,7 @@ $memoryCache = null;
 if (!file_exists($cacheFile) || (time() - filemtime($cacheFile)) >= $cacheTime) {
     if (file_exists($cacheFile)) touch($cacheFile); // Prevent cache stampede
     $data = fetchMatches();
-    if ($data) {
+    if ($data !== null) {
         $cacheData = [
             'lastScraped' => date('Y-m-d\TH:i:s\Z'),
             'matches' => $data,
@@ -450,6 +450,19 @@ if ($isProxy) {
     }
     
     echo $response;
+    exit;
+}
+
+$isLog = (isset($_GET['action']) && $_GET['action'] == 'log') || strpos($requestUri, 'log') !== false;
+
+if ($isLog && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $inputJSON = file_get_contents('php://input');
+    $input = json_decode($inputJSON, true);
+    
+    $logEntry = "[" . date('Y-m-d H:i:s') . "] " . json_encode($input) . "\n";
+    file_put_contents(__DIR__ . '/error_log.txt', $logEntry, FILE_APPEND);
+    
+    echo json_encode(['success' => true]);
     exit;
 }
 

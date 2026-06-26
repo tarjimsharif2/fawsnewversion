@@ -80,23 +80,38 @@ export default async function handler(req: any, res: any) {
                 
                 const rewritten = m3u8Content.split('\n').map(line => {
                     const t = line.trim();
-                    if (t.startsWith('#') || !t) return line;
+                    if (!t) return line;
                     
-                    // Sometimes there are URIs in EXT-X lines like #EXT-X-STREAM-INF or #EXT-X-MAP:URI="init.mp4"
-                    // but for basic segments, they are just lines without #
-                    if (t.startsWith('http://') || t.startsWith('https://')) return line;
-                    if (t.startsWith('/')) return rootUrl + t;
-                    return baseUrl + t;
+                    const headerQuery = req.query.headers ? `&headers=${encodeURIComponent(req.query.headers as string)}` : '';
+                    const myProxyBase = `/api/proxy?url=`;
+
+                    if (t.startsWith('#')) {
+                        // Rewrite URIs inside EXT-X tags (like #EXT-X-STREAM-INF, #EXT-X-MAP, etc) if they have URI="..."
+                        if (t.includes('URI="')) {
+                            return t.replace(/URI="(.*?)"/g, (match, uri) => {
+                                if (uri.startsWith('http://') || uri.startsWith('https://')) {
+                                    return `URI="${myProxyBase}${encodeURIComponent(uri)}${headerQuery}"`;
+                                }
+                                if (uri.startsWith('/')) {
+                                    return `URI="${myProxyBase}${encodeURIComponent(rootUrl + uri)}${headerQuery}"`;
+                                }
+                                return `URI="${myProxyBase}${encodeURIComponent(baseUrl + uri)}${headerQuery}"`;
+                            });
+                        }
+                        return line;
+                    }
+                    
+                    // For basic segments
+                    if (t.startsWith('http://') || t.startsWith('https://')) {
+                        return `${myProxyBase}${encodeURIComponent(t)}${headerQuery}`;
+                    }
+                    if (t.startsWith('/')) {
+                        return `${myProxyBase}${encodeURIComponent(rootUrl + t)}${headerQuery}`;
+                    }
+                    return `${myProxyBase}${encodeURIComponent(baseUrl + t)}${headerQuery}`;
                 }).join('\n');
                 
-                // Also rewrite URIs inside EXT-X tags (like #EXT-X-STREAM-INF, #EXT-X-MAP, etc) if they have URI="..."
-                const reURL = rewritten.replace(/URI="(.*?)"/g, (match, uri) => {
-                     if (uri.startsWith('http://') || uri.startsWith('https://')) return match;
-                     if (uri.startsWith('/')) return `URI="${rootUrl}${uri}"`;
-                     return `URI="${baseUrl}${uri}"`;
-                });
-                
-                res.send(reURL);
+                res.send(rewritten);
             });
             return;
         }
