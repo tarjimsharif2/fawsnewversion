@@ -34,14 +34,21 @@ export const runScraper = async () => {
 
         try {
             console.log("Fetching fawanews");
-            const res = await axios.get('http://www.fawanews.sc/', {
+            let res = await axios.get('http://www.fawanews.sc/', {
                 headers: {
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                 },
                 timeout: 8000
             });
             
-            const $ = cheerio.load(res.data);
+            let htmlData = res.data;
+            if (typeof htmlData === 'string' && (htmlData.includes('webadmin/deny') || !htmlData.includes('user-item'))) {
+                console.log("Blocked by ISP or no items, trying fallback proxy...");
+                res = await axios.get('https://api.allorigins.win/raw?url=' + encodeURIComponent('http://www.fawanews.sc/'), { timeout: 10000 });
+                htmlData = res.data;
+            }
+            
+            const $ = cheerio.load(htmlData);
             const matchesToProcess: any[] = [];
             
             const addedSlugs = new Set();
@@ -136,9 +143,15 @@ export const runScraper = async () => {
                     let extractedMap: Record<string, any> = {};
                     const linkPromises = match.fawaLinks.map(async (linkObj: any) => {
                         try {
-                            const matchRes = await axios.get(linkObj.href, { timeout: 8000, validateStatus: () => true });
-                            if (matchRes.status === 200) {
-                                const html = matchRes.data;
+                            let fetchUrl = linkObj.href.replace(/ /g, '%20');
+                            let matchRes = await axios.get(fetchUrl, { timeout: 8000, validateStatus: () => true });
+                            let html = matchRes.data;
+                            if (typeof html === 'string' && html.includes('webadmin/deny')) {
+                                matchRes = await axios.get('https://api.allorigins.win/raw?url=' + encodeURIComponent(fetchUrl), { timeout: 10000, validateStatus: () => true });
+                                html = matchRes.data;
+                            }
+
+                            if (matchRes.status === 200 && typeof html === 'string') {
                                 const videoMatch = html.match(/var\s+videos\s*=\s*(\[.*?\])/s);
                                 
                                 if (videoMatch) {
