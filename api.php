@@ -1,8 +1,10 @@
 <?php
 error_reporting(0);
 ini_set('display_errors', '0');
-header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Cache-Control: post-check=0, pre-check=0', false);
+header('Pragma: no-cache');
 
 $cacheFile = __DIR__ . '/cache.json';
 $cacheTime = 60; // 60 seconds
@@ -324,6 +326,7 @@ $isProxy = (isset($_GET['action']) && $_GET['action'] == 'proxy') || strpos($req
 if ($isProxy) {
     if (!isset($_GET['url'])) {
         http_response_code(400);
+        header('Content-Type: application/json');
         echo json_encode(['error' => 'Missing url parameter']);
         exit;
     }
@@ -374,7 +377,7 @@ if ($isProxy) {
             if (count($headerParts) < 2) return $len;
             $name = strtolower(trim($headerParts[0]));
             $value = trim($headerParts[1]);
-            if (in_array($name, ['content-type', 'content-length', 'cache-control', 'accept-ranges', 'content-range'])) {
+            if (in_array($name, ['content-type', 'content-length', 'accept-ranges', 'content-range'])) {
                  header($name . ': ' . $value);
             }
             return $len;
@@ -405,7 +408,7 @@ if ($isProxy) {
         
         $name = strtolower(trim($headerParts[0]));
         $value = trim($headerParts[1]);
-        if (in_array($name, ['content-type', 'content-length', 'cache-control', 'accept-ranges', 'content-range'])) {
+        if (in_array($name, ['content-type', 'accept-ranges', 'content-range'])) {
              header($name . ': ' . $value);
         }
         return $len;
@@ -417,6 +420,9 @@ if ($isProxy) {
     
     http_response_code($httpCode);
     header("Access-Control-Allow-Origin: *");
+    header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+    header("Pragma: no-cache");
+    header("Expires: 0");
     
     if (!$isMpeg && strpos($response, '#EXTM3U') === false) {
         echo $response;
@@ -451,23 +457,47 @@ if ($isProxy) {
                  // Rewrite URI inside #EXT-X tags (for sub-playlists, etc.)
                  if (preg_match('/URI="(.*?)"/', $t, $m)) {
                       $uri = $m[1];
-                      if (strpos($uri, 'http') === 0) {
-                          $newUri = $myProxyBase . urlencode($uri) . $headerP;
-                      } else if (strpos($uri, '/') === 0) {
-                          $newUri = $myProxyBase . urlencode($rootUrl . $uri) . $headerP;
+                      $needsProxy = (strpos($uri, '.m3u8') !== false || strpos($uri, '.mpd') !== false || strpos($uri, '.key') !== false);
+                      if ($needsProxy) {
+                          if (strpos($uri, 'http') === 0) {
+                              $newUri = $myProxyBase . urlencode($uri) . $headerP;
+                          } else if (strpos($uri, '/') === 0) {
+                              $newUri = $myProxyBase . urlencode($rootUrl . $uri) . $headerP;
+                          } else {
+                              $newUri = $myProxyBase . urlencode($baseUrl . $uri) . $headerP;
+                          }
                       } else {
-                          $newUri = $myProxyBase . urlencode($baseUrl . $uri) . $headerP;
+                          if (strpos($uri, 'http') === 0) {
+                              $newUri = $uri;
+                          } else if (strpos($uri, '/') === 0) {
+                              $newUri = $rootUrl . $uri;
+                          } else {
+                              $newUri = $baseUrl . $uri;
+                          }
                       }
                       $rewritten[] = preg_replace('/URI="(.*?)"/', 'URI="' . $newUri . '"', $line);
                  } else {
                       $rewritten[] = $line;
                  }
-            } else if (strpos($t, 'http') === 0) {
-                 $rewritten[] = $myProxyBase . urlencode($t) . $headerP;
-            } else if (strpos($t, '/') === 0) {
-                 $rewritten[] = $myProxyBase . urlencode($rootUrl . $t) . $headerP;
             } else {
-                 $rewritten[] = $myProxyBase . urlencode($baseUrl . $t) . $headerP;
+                 $needsProxy = (strpos($t, '.m3u8') !== false || strpos($t, '.mpd') !== false || strpos($t, '.key') !== false);
+                 if ($needsProxy) {
+                     if (strpos($t, 'http') === 0) {
+                          $rewritten[] = $myProxyBase . urlencode($t) . $headerP;
+                     } else if (strpos($t, '/') === 0) {
+                          $rewritten[] = $myProxyBase . urlencode($rootUrl . $t) . $headerP;
+                     } else {
+                          $rewritten[] = $myProxyBase . urlencode($baseUrl . $t) . $headerP;
+                     }
+                 } else {
+                     if (strpos($t, 'http') === 0) {
+                          $rewritten[] = $t;
+                     } else if (strpos($t, '/') === 0) {
+                          $rewritten[] = $rootUrl . $t;
+                     } else {
+                          $rewritten[] = $baseUrl . $t;
+                     }
+                 }
             }
         }
         $response = implode("\n", $rewritten);
@@ -480,6 +510,7 @@ if ($isProxy) {
 $isLog = (isset($_GET['action']) && $_GET['action'] == 'log') || strpos($requestUri, 'log') !== false;
 
 if ($isLog && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    header('Content-Type: application/json');
     $inputJSON = file_get_contents('php://input');
     $input = json_decode($inputJSON, true);
     
@@ -493,6 +524,7 @@ if ($isLog && $_SERVER['REQUEST_METHOD'] === 'POST') {
 $isScrape = (isset($_GET['action']) && $_GET['action'] == 'scrape') || strpos($requestUri, 'scrape') !== false;
 
 if ($isScrape) {
+    header('Content-Type: application/json');
     if ($memoryCache) {
         echo json_encode(['success' => true]);
     } else {
@@ -518,11 +550,13 @@ if (!$cached && $memoryCache) {
 }
 
 if (!$cached) {
+    header('Content-Type: application/json');
     echo json_encode(['error' => 'No data available']);
     exit;
 }
 
 if ($isMatchJson) {
+    header('Content-Type: application/json');
     $formattedMatches = [];
     $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'tv.photocard.fun';
     $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') || 
@@ -586,5 +620,6 @@ if ($isMatchJson) {
 
 } else {
     // Regular /api/matches output
+    header('Content-Type: application/json');
     echo json_encode($cached);
 }

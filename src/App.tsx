@@ -30,7 +30,7 @@ export default function App() {
   const fetchMatches = async (silent = false) => {
     try {
       const apiUrl = import.meta.env.VITE_API_URL || '';
-      const res = await fetch(`${apiUrl}/api/matches`);
+      const res = await fetch(`${apiUrl}/api/matches`, { cache: 'no-store' });
       if (!res.ok) {
         throw new Error(`HTTP ${res.status}: ${res.statusText || 'Server Error'}`);
       }

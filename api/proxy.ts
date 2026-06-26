@@ -57,7 +57,7 @@ export default async function handler(req: any, res: any) {
         res.status(response.status);
         res.setHeader('Access-Control-Allow-Origin', '*');
         
-        const hopByHopHeaders = ['connection', 'keep-alive', 'transfer-encoding', 'te', 'trailer', 'proxy-authorization', 'proxy-authenticate', 'upgrade', 'access-control-allow-origin', 'access-control-expose-headers'];
+        const hopByHopHeaders = ['connection', 'keep-alive', 'transfer-encoding', 'te', 'trailer', 'proxy-authorization', 'proxy-authenticate', 'upgrade', 'access-control-allow-origin', 'access-control-expose-headers', 'cache-control', 'pragma', 'expires'];
         
         const exposedHeaders: string[] = [];
         for (const [key, value] of Object.entries(response.headers)) {
@@ -67,6 +67,9 @@ export default async function handler(req: any, res: any) {
             }
         }
         res.setHeader('Access-Control-Expose-Headers', exposedHeaders.join(', '));
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
         
         // If m3u8, rewrite relative URLs to absolute URLs so the player resolves them correctly
         const contentType = response.headers['content-type'] || '';
