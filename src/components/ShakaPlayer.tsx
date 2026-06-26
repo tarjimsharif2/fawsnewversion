@@ -251,9 +251,9 @@ export const ShakaPlayer = ({
       let playerConfig: any = {
         streaming: {
           lowLatencyMode: true,
-          bufferingGoal: 10,
-          rebufferingGoal: 2,
-          bufferBehind: 15,
+          bufferingGoal: 5,
+          rebufferingGoal: 1,
+          bufferBehind: 10,
           stallEnabled: true,
           stallThreshold: 1,
           stallSkip: 0.5,
@@ -269,6 +269,10 @@ export const ShakaPlayer = ({
         manifest: {
           dash: {
             ignoreMinBufferTime: true,
+          },
+          hls: {
+            ignoreTextStreamFailures: true,
+            ignoreImageStreamFailures: true,
           },
           retryParameters: {
             timeout: 8000,
