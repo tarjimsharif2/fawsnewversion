@@ -35,13 +35,21 @@ export const runScraper = async () => {
         try {
             console.log("Fetching fawanews");
             let htmlData = '';
-            let res = await axios.get('http://www.fawanews.sc/', {
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                },
-                timeout: 25000 // Increased timeout, no proxy fallback
-            });
-            htmlData = res.data;
+            try {
+                let res = await axios.get('http://www.fawanews.sc/', {
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    },
+                    timeout: 8000
+                });
+                htmlData = res.data;
+            } catch (e: any) {
+                console.log("Direct fetch failed, using proxy fallback...");
+                let res = await axios.get('https://corsproxy.org/?http://www.fawanews.sc/', {
+                    timeout: 15000
+                });
+                htmlData = res.data;
+            }
             
             const $ = cheerio.load(htmlData);
             const matchesToProcess: any[] = [];
@@ -142,11 +150,18 @@ export const runScraper = async () => {
                             let html = '';
                             let matchResStatus = 0;
                             try {
-                                let matchRes = await axios.get(fetchUrl, { timeout: 25000, validateStatus: () => true });
+                                let matchRes = await axios.get(fetchUrl, { timeout: 8000, validateStatus: () => true });
                                 html = matchRes.data;
                                 matchResStatus = matchRes.status;
                             } catch (e: any) {
-                                console.log("Error fetching match directly:", e.message);
+                                console.log("Error fetching match directly, using proxy fallback:", e.message);
+                                try {
+                                    let matchRes = await axios.get('https://corsproxy.org/?' + encodeURIComponent(fetchUrl), { timeout: 15000, validateStatus: () => true });
+                                    html = matchRes.data;
+                                    matchResStatus = matchRes.status;
+                                } catch (proxyError: any) {
+                                    console.log("Proxy also failed:", proxyError.message);
+                                }
                             }
 
                             if (matchResStatus === 200 && typeof html === 'string') {
@@ -227,9 +242,9 @@ export const runScraper = async () => {
         }
 
         if (parsedMatches.length > 0) {
-            const validatePromises: Promise<void>[] = [];
+            const validatePromises: (() => Promise<void>)[] = [];
             
-            // Start background stream validation
+            // Prepare validation tasks
             for (const match of parsedMatches) {
                 for (const server of match.servers) {
                     if (server.streamUrl || server.url) {
@@ -237,67 +252,68 @@ export const runScraper = async () => {
                         (server as any).isValidating = true;
                         (server as any).isWorking = false;
                         
-                        // Validate
-                        const defaultHeaders = {
-                            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
-                            "Referer": "http://www.fawanews.sc/"
-                        };
-                        const p = axios.get(targetUrl, {
-                            headers: { ...defaultHeaders, ...(server.headers || {}) },
-                            timeout: 15000,
-                            responseType: 'text',
-                            validateStatus: (status) => status < 500
-                        }).then(async (res) => {
-                            let html = res.data;
-                            if (typeof html === 'string' && html.includes('_p') && html.includes('_d')) {
-                                const pMatch = html.match(/_p\s*=\s*['"](.*?)['"]/);
-                                const dMatch = html.match(/_d\s*=\s*['"](.*?)['"]/);
-                                if (pMatch && dMatch) {
-                                    try {
-                                        const fn = new Function('window', 'unescape', 'pStr', `
-                                            try {
-                                               ${unescape(dMatch[1])}
-                                               if (typeof window.mfaab84 === "function") return window.mfaab84(pStr);
-                                            } catch(e){}
-                                            return null;
-                                        `);
-                                        const result = fn({}, unescape, unescape(pMatch[1]));
-                                        if (result) {
-                                            const streamMatch = result.match(/https?:\/\/[^\s"'<>\\]+\.(m3u8|mpd)[^\s"'<>\\]*/i);
-                                            if (streamMatch) {
-                                                server.streamUrl = streamMatch[0];
-                                                server.type = streamMatch[0].includes('.mpd') ? 'dash' : 'm3u8';
-                                                
-                                                const kidMatch = result.match(/k_id\s*=\s*['"]([^'"]+)['"]/);
-                                                const kvMatch = result.match(/k_v\s*=\s*['"]([^'"]+)['"]/);
-                                                if (kidMatch && kvMatch) {
-                                                    server.drmKey = [{ keyId: kidMatch[1], key: kvMatch[1] }];
+                        validatePromises.push(async () => {
+                            const defaultHeaders = {
+                                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+                                "Referer": "http://www.fawanews.sc/"
+                            };
+                            try {
+                                const res = await axios.get(targetUrl, {
+                                    headers: { ...defaultHeaders, ...(server.headers || {}) },
+                                    timeout: 10000,
+                                    responseType: 'text',
+                                    validateStatus: (status) => status < 500
+                                });
+                                let html = res.data;
+                                if (typeof html === 'string' && html.includes('_p') && html.includes('_d')) {
+                                    const pMatch = html.match(/_p\s*=\s*['"](.*?)['"]/);
+                                    const dMatch = html.match(/_d\s*=\s*['"](.*?)['"]/);
+                                    if (pMatch && dMatch) {
+                                        try {
+                                            const fn = new Function('window', 'unescape', 'pStr', `
+                                                try {
+                                                   ${unescape(dMatch[1])}
+                                                   if (typeof window.mfaab84 === "function") return window.mfaab84(pStr);
+                                                } catch(e){}
+                                                return null;
+                                            `);
+                                            const result = fn({}, unescape, unescape(pMatch[1]));
+                                            if (result) {
+                                                const streamMatch = result.match(/https?:\/\/[^\s"'<>\\]+\.(m3u8|mpd)[^\s"'<>\\]*/i);
+                                                if (streamMatch) {
+                                                    server.streamUrl = streamMatch[0];
+                                                    server.type = streamMatch[0].includes('.mpd') ? 'dash' : 'm3u8';
+                                                    
+                                                    const kidMatch = result.match(/k_id\s*=\s*['"]([^'"]+)['"]/);
+                                                    const kvMatch = result.match(/k_v\s*=\s*['"]([^'"]+)['"]/);
+                                                    if (kidMatch && kvMatch) {
+                                                        server.drmKey = [{ keyId: kidMatch[1], key: kvMatch[1] }];
+                                                    }
                                                 }
                                             }
-                                        }
-                                    } catch(e) {}
+                                        } catch(e) {}
+                                    }
                                 }
-                            }
-                            
-                            if (res.status >= 200 && res.status < 400 && html) {
-                                const isM3u8 = typeof html === 'string' && html.includes('#EXTM3U');
-                                const isHtmlPlayer = typeof html === 'string' && html.includes('<html'); 
-                                if (isM3u8 || isHtmlPlayer || server.streamUrl) {
-                                    (server as any).isWorking = true;
-                                } else if (res.status === 200) {
-                                    (server as any).isWorking = true;
+                                
+                                if (res.status >= 200 && res.status < 400 && html) {
+                                    const isM3u8 = typeof html === 'string' && html.includes('#EXTM3U');
+                                    const isHtmlPlayer = typeof html === 'string' && html.includes('<html'); 
+                                    if (isM3u8 || isHtmlPlayer || server.streamUrl) {
+                                        (server as any).isWorking = true;
+                                    } else if (res.status === 200) {
+                                        (server as any).isWorking = true;
+                                    } else {
+                                        (server as any).isWorking = false;
+                                    }
                                 } else {
                                     (server as any).isWorking = false;
                                 }
-                            } else {
+                            } catch(err) {
                                 (server as any).isWorking = false;
+                            } finally {
+                                (server as any).isValidating = false;
                             }
-                        }).catch((err) => {
-                            (server as any).isWorking = false;
-                        }).finally(() => {
-                            (server as any).isValidating = false;
                         });
-                        validatePromises.push(p);
                     } else {
                         (server as any).isWorking = false;
                         (server as any).isValidating = false;
@@ -305,8 +321,16 @@ export const runScraper = async () => {
                 }
             }
 
-            // Await all validations to complete
-            await Promise.allSettled(validatePromises);
+            // Run validations with concurrency limit of 3
+            const limit = 3;
+            for (let i = 0; i < validatePromises.length; i += limit) {
+                const chunk = validatePromises.slice(i, i + limit);
+                await Promise.allSettled(chunk.map(fn => fn()));
+                // Add a small delay between chunks to avoid rate limiting
+                if (i + limit < validatePromises.length) {
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                }
+            }
 
             scrapedMatches = parsedMatches;
             lastScrapedTime = new Date().toISOString();
@@ -314,6 +338,8 @@ export const runScraper = async () => {
         } else {
             lastScrapeError = errors.join(" || ");
             console.error("All scraper attempts failed:", lastScrapeError);
+            // Update lastScrapedTime even on failure so we don't infinitely retry!
+            lastScrapedTime = new Date().toISOString();
         }
     })();
 

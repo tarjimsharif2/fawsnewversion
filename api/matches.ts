@@ -9,12 +9,20 @@ export default async function handler(req: any, res: any) {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
 
     try {
+        const cached = getCachedMatches();
+        
         if (needsRefresh()) {
-            await runScraper();
+            if (cached.matches.length > 0) {
+                // We have stale data. Return it instantly and run scraper in background.
+                runScraper().catch(console.error);
+            } else {
+                // We have no data. We must wait for scraper.
+                await runScraper();
+            }
         }
         
-        const cached = getCachedMatches();
-        return res.json(cached);
+        const freshCached = getCachedMatches();
+        return res.json(freshCached);
     } catch (err: any) {
         console.error("Vercel route handler error:", err);
         return res.status(200).json({
