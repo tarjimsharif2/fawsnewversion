@@ -343,7 +343,11 @@ export const runScraper = async () => {
         }
     })();
 
-    await activeScrapePromise;
+    try {
+        await activeScrapePromise;
+    } finally {
+        activeScrapePromise = null;
+    }
 };
 
 export const getCachedMatches = () => {
