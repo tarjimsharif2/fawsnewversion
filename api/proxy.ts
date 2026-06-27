@@ -93,6 +93,7 @@ export default async function handler(req: any, res: any) {
                     
                     const headerQuery = req.query.headers ? `&headers=${encodeURIComponent(req.query.headers as string)}` : '';
                     const myProxyBase = `/api/proxy?url=`;
+                    const myProxyBaseMp4 = `/api/proxy.mp4?url=`;
 
                     if (t.startsWith('#')) {
                         // Rewrite URIs inside EXT-X tags (like #EXT-X-STREAM-INF, #EXT-X-MAP, etc) if they have URI="..."
@@ -103,7 +104,9 @@ export default async function handler(req: any, res: any) {
                                     absUri = uri.startsWith('/') ? rootUrl + uri : baseUrl + uri;
                                 }
                                 if (reqQueryDirectTs && !absUri.includes('.m3u8')) return `URI="${absUri}"`;
-                                return `URI="${myProxyBase}${encodeURIComponent(absUri)}${headerQuery}${reqQueryDirectTs ? '&directTs=true' : ''}"`;
+                                
+                                const pBase = absUri.includes('.m3u8') ? myProxyBase : myProxyBaseMp4;
+                                return `URI="${pBase}${encodeURIComponent(absUri)}${headerQuery}${reqQueryDirectTs ? '&directTs=true' : ''}"`;
                             });
                         }
                         return line;
@@ -115,7 +118,9 @@ export default async function handler(req: any, res: any) {
                         absTs = t.startsWith('/') ? rootUrl + t : baseUrl + t;
                     }
                     if (reqQueryDirectTs && !absTs.includes('.m3u8')) return absTs;
-                    return `${myProxyBase}${encodeURIComponent(absTs)}${headerQuery}${reqQueryDirectTs ? '&directTs=true' : ''}`;
+                    
+                    const pBase = absTs.includes('.m3u8') ? myProxyBase : myProxyBaseMp4;
+                    return `${pBase}${encodeURIComponent(absTs)}${headerQuery}${reqQueryDirectTs ? '&directTs=true' : ''}`;
                 }).join('\n');
                 
                 res.send(rewritten);

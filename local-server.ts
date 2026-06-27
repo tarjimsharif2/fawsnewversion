@@ -17,6 +17,7 @@ app.use(express.json());
 
 // Wire up the Vercel-like handlers to Express
 app.all('/api/proxy', (req, res) => proxyHandler(req, res));
+app.all('/api/proxy.mp4', (req, res) => proxyHandler(req, res));
 app.get('/api/matches', (req, res) => matchesHandler(req, res));
 app.get('/api/match.json', (req, res) => matchJsonHandler(req, res));
 app.post('/api/scrape', (req, res) => scrapeHandler(req, res));
