@@ -201,7 +201,7 @@ export const runScraper = async () => {
                         const ext = extractedMap[url];
                         
                         const streamUrl = ext ? ext.streamUrl : '';
-                        const type = ext ? ext.type : 'm3u8';
+                        const type = streamUrl ? (ext ? ext.type : 'm3u8') : 'iframe';
                         
                         const checkUrl = streamUrl || url || '';
                         

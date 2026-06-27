@@ -80,21 +80,18 @@ export default function ServerStreamPage({ data, loading }: { data: any, loading
 
   useEffect(() => {
     if (activeServer && !activeServer.streamUrl && activeServer.url?.includes('fawanews.sc')) {
-      // Fallback extraction on frontend using proxy if server scraping failed (e.g. Cpanel issues)
       const apiUrl = import.meta.env.VITE_API_URL || '';
       fetch(`${apiUrl}/api/proxy?url=${encodeURIComponent(activeServer.url)}`)
         .then(res => res.text())
         .then(html => {
+          let streamUrl = '';
           if (html.includes('var videos =')) {
              const videoMatch = html.match(/var\s+videos\s*=\s*(\[.*?\])/s);
              if (videoMatch) {
                 try {
                    const parsedVideos = JSON.parse(videoMatch[1].replace(/'/g, '"').replace(/,\s*\]/, ']'));
                    if (Array.isArray(parsedVideos) && parsedVideos.length > 0 && parsedVideos[0]) {
-                      const streamStr = parsedVideos[0];
-                      setInjectedStreamUrl(streamStr);
-                      setInjectedType(streamStr.includes('.mpd') ? 'dash' : 'm3u8');
-                      return;
+                      streamUrl = parsedVideos[0];
                    }
                 } catch (e) {
                    console.error("Failed to parse videos array", e);
@@ -102,31 +99,13 @@ export default function ServerStreamPage({ data, loading }: { data: any, loading
              }
           }
 
-          if (html.includes('_p') && html.includes('_d')) {
-            const pMatch = html.match(/_p\s*=\s*['"](.*?)['"]/);
-            const dMatch = html.match(/_d\s*=\s*['"](.*?)['"]/);
-            if (pMatch && dMatch) {
-              const fn = new Function('window', 'unescape', 'pStr', `
-                  try {
-                      ${unescape(dMatch[1])}
-                      if (typeof window.mfaab84 === "function") return window.mfaab84(pStr);
-                  } catch(e){}
-                  return null;
-              `);
-              const result = fn({}, unescape, unescape(pMatch[1]));
-              if (result) {
-                const streamMatch = result.match(/https?:\/\/[^\s"'<>\\]+\.(m3u8|mpd)[^\s"'<>\\]*/i);
-                if (streamMatch) {
-                   setInjectedStreamUrl(streamMatch[0]);
-                   setInjectedType(streamMatch[0].includes('.mpd') ? 'dash' : 'm3u8');
-                   const kidMatch = result.match(/k_id\s*=\s*['"]([^'"]+)['"]/);
-                   const kvMatch = result.match(/k_v\s*=\s*['"]([^'"]+)['"]/);
-                   if (kidMatch && kvMatch) {
-                       setInjectedDrm([{ keyId: kidMatch[1], key: kvMatch[1] }]);
-                   }
-                }
-              }
-            }
+          if (streamUrl) {
+            // Found a stream. Now proxy the m3u8 and ts segments to avoid mixed content and CORS
+            const customHeaders = JSON.stringify({ "Referer": "http://www.fawanews.sc/" });
+            const proxiedM3u8Url = `${apiUrl}/api/proxy?url=${encodeURIComponent(streamUrl)}&headers=${encodeURIComponent(customHeaders)}`;
+            setInjectedStreamUrl(proxiedM3u8Url);
+            setInjectedType(streamUrl.includes('.mpd') ? 'dash' : 'm3u8');
+            // Headers will be cleared in the render block for fawanews
           }
         })
         .catch(err => console.error("Client side extraction failed:", err));
@@ -152,6 +131,17 @@ export default function ServerStreamPage({ data, loading }: { data: any, loading
   }
 
   let finalStreamUrl = injectedStreamUrl || activeServer.streamUrl;
+  let finalHeaders = activeServer.headers;
+  
+  if (finalStreamUrl && activeServer.url?.includes('fawanews.sc')) {
+      finalHeaders = undefined; // Do not send referer via JS fetch directly to avoid CORS preflight, proxy handles it
+      if (!injectedStreamUrl) {
+          const apiUrl = import.meta.env.VITE_API_URL || '';
+          const customHeaders = JSON.stringify({ "Referer": "http://www.fawanews.sc/" });
+          finalStreamUrl = `${apiUrl}/api/proxy?url=${encodeURIComponent(finalStreamUrl)}&headers=${encodeURIComponent(customHeaders)}`;
+      }
+  }
+
   let finalDrm = injectedDrm || (activeServer as any).drm || (activeServer as any).drmKey;
   let finalType = injectedType || activeServer.type;
 
@@ -214,7 +204,7 @@ export default function ServerStreamPage({ data, loading }: { data: any, loading
                src={checkUrl} 
                type={finalType}
                title={activeServer.name}
-               headers={activeServer.headers || {}}
+               headers={finalHeaders || {}}
                drm={finalDrm}
             />
          )}

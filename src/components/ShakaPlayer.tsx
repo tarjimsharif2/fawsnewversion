@@ -422,7 +422,7 @@ export const ShakaPlayer = ({
       }
       (video as any)._shakaSyncListener = syncToLiveEdge;
 
-      const mimeType = type === 'dash' ? 'application/dash+xml' : (type === 'hls' ? 'application/x-mpegURL' : undefined);
+      const mimeType = type === 'dash' ? 'application/dash+xml' : (type === 'hls' || type === 'm3u8' ? 'application/x-mpegurl' : undefined);
       await player.load(finalSrc, undefined, mimeType);
       
       if (currentInitId !== initIdRef.current) return;
@@ -445,7 +445,8 @@ export const ShakaPlayer = ({
     } catch (err: any) {
       if (currentInitId !== initIdRef.current) return;
       console.error("Shaka init error:", err);
-      setError(err?.message || "Failed to load stream");
+      const errorMessage = err?.message || (err?.code ? `Shaka Error Code: ${err.code}` : "Failed to load stream");
+      setError(errorMessage);
       setIsLoading(false);
       if (onErrorFallbackRef.current) onErrorFallbackRef.current();
     }

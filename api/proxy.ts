@@ -67,9 +67,13 @@ export default async function handler(req: any, res: any) {
             }
         }
         res.setHeader('Access-Control-Expose-Headers', exposedHeaders.join(', '));
-        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
-        res.setHeader('Pragma', 'no-cache');
-        res.setHeader('Expires', '0');
+        if (targetUrl.includes('.ts')) {
+            res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        } else {
+            res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+            res.setHeader('Pragma', 'no-cache');
+            res.setHeader('Expires', '0');
+        }
         
         // If m3u8, rewrite relative URLs to absolute URLs so the player resolves them correctly
         const contentType = response.headers['content-type'] || '';
@@ -80,6 +84,8 @@ export default async function handler(req: any, res: any) {
             response.data.on('end', () => {
                 const baseUrl = targetUrl.substring(0, targetUrl.lastIndexOf('/') + 1);
                 const rootUrl = new URL(targetUrl).origin;
+                
+                const reqQueryDirectTs = req.query.directTs === 'true';
                 
                 const rewritten = m3u8Content.split('\n').map(line => {
                     const t = line.trim();
@@ -92,26 +98,24 @@ export default async function handler(req: any, res: any) {
                         // Rewrite URIs inside EXT-X tags (like #EXT-X-STREAM-INF, #EXT-X-MAP, etc) if they have URI="..."
                         if (t.includes('URI="')) {
                             return t.replace(/URI="(.*?)"/g, (match, uri) => {
-                                if (uri.startsWith('http://') || uri.startsWith('https://')) {
-                                    return `URI="${myProxyBase}${encodeURIComponent(uri)}${headerQuery}"`;
+                                let absUri = uri;
+                                if (!uri.startsWith('http://') && !uri.startsWith('https://')) {
+                                    absUri = uri.startsWith('/') ? rootUrl + uri : baseUrl + uri;
                                 }
-                                if (uri.startsWith('/')) {
-                                    return `URI="${myProxyBase}${encodeURIComponent(rootUrl + uri)}${headerQuery}"`;
-                                }
-                                return `URI="${myProxyBase}${encodeURIComponent(baseUrl + uri)}${headerQuery}"`;
+                                if (reqQueryDirectTs && !absUri.includes('.m3u8')) return `URI="${absUri}"`;
+                                return `URI="${myProxyBase}${encodeURIComponent(absUri)}${headerQuery}${reqQueryDirectTs ? '&directTs=true' : ''}"`;
                             });
                         }
                         return line;
                     }
                     
                     // For basic segments
-                    if (t.startsWith('http://') || t.startsWith('https://')) {
-                        return `${myProxyBase}${encodeURIComponent(t)}${headerQuery}`;
+                    let absTs = t;
+                    if (!t.startsWith('http://') && !t.startsWith('https://')) {
+                        absTs = t.startsWith('/') ? rootUrl + t : baseUrl + t;
                     }
-                    if (t.startsWith('/')) {
-                        return `${myProxyBase}${encodeURIComponent(rootUrl + t)}${headerQuery}`;
-                    }
-                    return `${myProxyBase}${encodeURIComponent(baseUrl + t)}${headerQuery}`;
+                    if (reqQueryDirectTs && !absTs.includes('.m3u8')) return absTs;
+                    return `${myProxyBase}${encodeURIComponent(absTs)}${headerQuery}${reqQueryDirectTs ? '&directTs=true' : ''}`;
                 }).join('\n');
                 
                 res.send(rewritten);

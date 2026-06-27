@@ -9,14 +9,15 @@ export default async function handler(req: any, res: any) {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
 
     try {
+        const force = req.query?.force === 'true';
         const cached = getCachedMatches();
         
-        if (needsRefresh()) {
-            if (cached.matches.length > 0) {
+        if (force || needsRefresh()) {
+            if (!force && cached.matches.length > 0) {
                 // We have stale data. Return it instantly and run scraper in background.
                 runScraper().catch(console.error);
             } else {
-                // We have no data. We must wait for scraper.
+                // We have no data or forcing refresh. We must wait for scraper.
                 await runScraper();
             }
         }
