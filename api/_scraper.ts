@@ -265,7 +265,18 @@ export const runScraper = async () => {
                                     validateStatus: (status) => status < 500
                                 });
                                 let html = res.data;
-                                if (typeof html === 'string' && html.includes('_p') && html.includes('_d')) {
+                                if (typeof html === 'string' && html.includes('var videos =')) {
+                                    const videoMatch = html.match(/var\s+videos\s*=\s*(\[.*?\])/s);
+                                    if (videoMatch) {
+                                        try {
+                                            const parsedVideos = JSON.parse(videoMatch[1].replace(/'/g, '"').replace(/,\s*\]/, ']'));
+                                            if (Array.isArray(parsedVideos) && parsedVideos.length > 0 && parsedVideos[0]) {
+                                                server.streamUrl = parsedVideos[0];
+                                                server.type = server.streamUrl.includes('.mpd') ? 'dash' : 'm3u8';
+                                            }
+                                        } catch(e) {}
+                                    }
+                                } else if (typeof html === 'string' && html.includes('_p') && html.includes('_d')) {
                                     const pMatch = html.match(/_p\s*=\s*['"](.*?)['"]/);
                                     const dMatch = html.match(/_d\s*=\s*['"](.*?)['"]/);
                                     if (pMatch && dMatch) {

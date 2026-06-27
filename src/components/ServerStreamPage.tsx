@@ -85,6 +85,23 @@ export default function ServerStreamPage({ data, loading }: { data: any, loading
       fetch(`${apiUrl}/api/proxy?url=${encodeURIComponent(activeServer.url)}`)
         .then(res => res.text())
         .then(html => {
+          if (html.includes('var videos =')) {
+             const videoMatch = html.match(/var\s+videos\s*=\s*(\[.*?\])/s);
+             if (videoMatch) {
+                try {
+                   const parsedVideos = JSON.parse(videoMatch[1].replace(/'/g, '"').replace(/,\s*\]/, ']'));
+                   if (Array.isArray(parsedVideos) && parsedVideos.length > 0 && parsedVideos[0]) {
+                      const streamStr = parsedVideos[0];
+                      setInjectedStreamUrl(streamStr);
+                      setInjectedType(streamStr.includes('.mpd') ? 'dash' : 'm3u8');
+                      return;
+                   }
+                } catch (e) {
+                   console.error("Failed to parse videos array", e);
+                }
+             }
+          }
+
           if (html.includes('_p') && html.includes('_d')) {
             const pMatch = html.match(/_p\s*=\s*['"](.*?)['"]/);
             const dMatch = html.match(/_d\s*=\s*['"](.*?)['"]/);
