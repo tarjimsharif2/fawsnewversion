@@ -447,16 +447,16 @@ export const ShakaPlayer = ({
       
       if (currentInitId !== initIdRef.current) return;
 
-      video.muted = true;
+      video.muted = false;
       try {
         await video.play();
-        video.muted = false;
       } catch {
+        console.warn("Unmuted autoplay blocked, falling back to muted autoplay.");
         video.muted = true;
         try {
           await video.play();
         } catch (playErr) {
-          console.warn("Autoplay blocked:", playErr);
+          console.warn("Muted autoplay blocked too:", playErr);
         }
       }
 
@@ -575,7 +575,6 @@ export const ShakaPlayer = ({
         <video
           ref={videoRef}
           autoPlay
-          muted
           playsInline
           preload="metadata"
           className="w-full h-full bg-black object-fill"
