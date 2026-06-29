@@ -93,7 +93,7 @@ export default async function handler(req: any, res: any) {
                     
                     const headerQuery = req.query.headers ? `&headers=${encodeURIComponent(req.query.headers as string)}` : '';
                     const myProxyBase = `/api/proxy?url=`;
-                    const myProxyBaseMp4 = `/api/proxy.mp4?url=`;
+                    const myProxyBaseMp4 = process.env.EXTERNAL_PROXY_URL ? `${process.env.EXTERNAL_PROXY_URL}?url=` : `/api/proxy.mp4?url=`;
 
                     if (t.startsWith('#')) {
                         // Rewrite URIs inside EXT-X tags (like #EXT-X-STREAM-INF, #EXT-X-MAP, etc) if they have URI="..."

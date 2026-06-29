@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import { RefreshCw, AlertCircle, ArrowLeft } from "lucide-react";
 import shakaUiScriptUrl from "shaka-player/dist/shaka-player.ui.js?url";
 import shakaControlsCssUrl from "shaka-player/dist/controls.css?url";
+import { ShakaP2PEngine } from "p2p-media-loader-shaka";
 
 declare global {
   interface Window {
@@ -129,6 +130,10 @@ export const ShakaPlayer = ({
     let shaka: any;
     try {
       shaka = await loadShakaLibrary();
+      if (!(window as any)._p2pRegistered) {
+        ShakaP2PEngine.registerPlugins(shaka);
+        (window as any)._p2pRegistered = true;
+      }
     } catch (err: any) {
       if (currentInitId !== initIdRef.current) return;
       setError(err?.message || "Shaka Player library not loaded");
@@ -188,6 +193,21 @@ export const ShakaPlayer = ({
       
       const player = new shaka.Player();
       playerRef.current = player;
+      
+      let p2pEngine: any = null;
+      try {
+        p2pEngine = new ShakaP2PEngine();
+        p2pEngine.bindShakaPlayer(player);
+        (player as any)._p2pEngine = p2pEngine;
+        
+        p2pEngine.addEventListener('onChunkDownloaded', (bytesLength: number, downloadSource: string, peerId: string) => {
+          if (downloadSource === 'p2p') {
+             console.log(`[P2P] Downloaded ${bytesLength} bytes from peer ${peerId}`);
+          }
+        });
+      } catch (e) {
+        console.warn("P2P Engine failed to initialize", e);
+      }
 
       const attachPromise = player.attach(video);
       await attachPromise;
@@ -250,13 +270,13 @@ export const ShakaPlayer = ({
 
       let playerConfig: any = {
         streaming: {
-          lowLatencyMode: true,
-          bufferingGoal: 5,
-          rebufferingGoal: 1,
-          bufferBehind: 10,
+          lowLatencyMode: false,
+          bufferingGoal: 30,
+          rebufferingGoal: 2,
+          bufferBehind: 30,
           stallEnabled: true,
           stallThreshold: 1,
-          stallSkip: 0.5,
+          stallSkip: 1,
           retryParameters: {
 
             timeout: 10000,
@@ -407,8 +427,8 @@ export const ShakaPlayer = ({
         if (player.isLive()) {
           const seekRange = player.seekRange();
           const liveEdge = seekRange.end;
-          if (liveEdge - video.currentTime > 7) {
-            video.currentTime = liveEdge - 2;
+          if (liveEdge - video.currentTime > 25) {
+            video.currentTime = liveEdge - 15;
           }
         }
       };
@@ -494,6 +514,11 @@ export const ShakaPlayer = ({
       if (playerRef.current) {
         const playerToDestroy = playerRef.current;
         playerRef.current = null;
+        if ((playerToDestroy as any)._p2pEngine) {
+           try {
+              (playerToDestroy as any)._p2pEngine.destroy();
+           } catch(e) {}
+        }
         try {
           const p = playerToDestroy.destroy();
           if (p) promises.push(p.catch(() => {}));
