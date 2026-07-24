@@ -455,6 +455,9 @@ export const ShakaPlayer = ({
         video.muted = true;
         try {
           await video.play();
+          setTimeout(() => {
+            if (video) video.muted = false;
+          }, 500);
         } catch (playErr) {
           console.warn("Muted autoplay blocked too:", playErr);
         }
